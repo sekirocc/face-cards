@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.5)
 
 project(human_card VERSION 0.1 LANGUAGES CXX)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/Modules)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -11,14 +10,21 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+##
+## QT6
+##
+
 find_package(QT NAMES Qt6 Qt5
         REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR}
         REQUIRED COMPONENTS Widgets
         OPTIONAL_COMPONENTS Multimedia MultimediaWidgets)
 
+
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
+
 ##
-# Find FFMPEG include directories and link libraries.
+## Find FFMPEG include directories and link libraries.
 ##
 find_package(FFMPEG REQUIRED)
 
@@ -26,8 +32,51 @@ message("FFMPEG_LIBRARIES ${FFMPEG_LIBRARIES}")
 message("FFMPEG_INCLUDE_DIRS ${FFMPEG_INCLUDE_DIRS}")
 
 
-# libyuv
+
+##
+## Find DondeToolkits
+##
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../../cpp/donde-toolkits/install/cmake)
+message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+find_package(DondeToolkits CONFIG REQUIRED)
+
+
+## google libyuv
 add_subdirectory(3rdparty/libyuv)
+
+
+##
+## conan libraries
+##
+if (NOT DEFINED CONAN_ALREADY_SETUP)
+    include(cmake-build-debug/conanbuildinfo.cmake)
+    conan_basic_setup(TARGETS)
+    set(CONAN_ALREADY_SETUP true)
+endif()
+# only these libs. could add more if needed.
+set(CONAN_LIBs
+        CONAN_PKG::fmt
+        CONAN_PKG::nlohmann_json
+        CONAN_PKG::toml11
+        CONAN_PKG::msgpack
+)
+
+##
+## OpenVINO library
+##
+
+find_package(OpenVINO REQUIRED COMPONENTS Runtime)
+message("OpenVINO_FOUND: ${OpenVINO_FOUND}")
+message("OpenVINO_Runtime_FOUND: ${OpenVINO_Runtime_FOUND}")
+
+##
+## OpenCV
+##
+
+find_package(OpenCV REQUIRED CONFIG)
+message("OpenCV_LIBS: ${OpenCV_LIBS}")
+
+
 
 set(VIDEO_SOURCES
         video/video_context.cpp
@@ -40,6 +89,7 @@ set(VIDEO_SOURCES
         3rdparty/cppchannel/channel.cpp
 )
 
+
 set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
@@ -47,6 +97,7 @@ set(PROJECT_SOURCES
         mainwindow.ui
         ${VIDEO_SOURCES}
 )
+
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(human_card
@@ -79,6 +130,7 @@ target_include_directories(human_card PRIVATE
         ${CMAKE_SOURCE_DIR}/3rdparty/cppchannel
         ${CMAKE_SOURCE_DIR}/video
         ${FFMPEG_INCLUDE_DIRS}
+        # ${CMAKE_CURRENT_SOURCE_DIR}/../../cpp/donde-toolkits/install/include
 )
 
 
@@ -88,6 +140,10 @@ target_link_libraries(human_card PRIVATE
         Qt${QT_VERSION_MAJOR}::MultimediaWidgets
         yuv
         ${FFMPEG_LIBRARIES}
+        donde::DondeToolkits
+        ${CONAN_LIBs}
+        openvino::runtime
+        ${OpenCV_LIBS}
 )
 
 set_target_properties(human_card PROPERTIES
