@@ -36,7 +36,7 @@ message("FFMPEG_INCLUDE_DIRS ${FFMPEG_INCLUDE_DIRS}")
 ##
 ## Find DondeToolkits
 ##
-set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/../../cpp/donde-toolkits/install/cmake)
+set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../cpp/donde-toolkits/install/cmake ${CMAKE_PREFIX_PATH})
 message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
 find_package(DondeToolkits CONFIG REQUIRED)
 
@@ -59,6 +59,7 @@ set(CONAN_LIBs
         CONAN_PKG::nlohmann_json
         CONAN_PKG::toml11
         CONAN_PKG::msgpack
+        CONAN_PKG::poco
 )
 
 ##

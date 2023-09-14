@@ -224,7 +224,7 @@ class ChannelTimer
         {
             event.notify_all();
         }
-        else if (status == DEFAULT)
+        else if (status == CHANNEL_STATUS_DEFAULT)
         {
             status = RESET;
         }
@@ -233,7 +233,7 @@ class ChannelTimer
         {
             thread.join();
         }
-        status = DEFAULT;
+        status = CHANNEL_STATUS_DEFAULT;
         c = Channel<bool>(1);
         sleep_timeout_ms = timeout_ms;
         if (sleep_timeout_ms <= 0)
@@ -256,7 +256,7 @@ class ChannelTimer
   private:
     void awake()
     {
-        status = DEFAULT;
+        status = CHANNEL_STATUS_DEFAULT;
         c.m << true;
         c.close();
     }
@@ -276,7 +276,7 @@ class ChannelTimer
 
     enum
     {
-        DEFAULT,
+        CHANNEL_STATUS_DEFAULT,
         SLEEPING,
         RESET,
     };
@@ -284,7 +284,7 @@ class ChannelTimer
   private:
     std::mutex mutex;
     std::thread thread;
-    int status = DEFAULT;
+    int status = CHANNEL_STATUS_DEFAULT;
     int64_t sleep_timeout_ms = 0;
     std::condition_variable event;
 };
@@ -560,6 +560,6 @@ class ChannelSelect
     cs.timers[cs.timer_num++].reset(milliseconds);                                                                     \
     CASE_ANYWAY(cs.timers[cs.timer_num - 1].c >> true)
 
-#define DEFAULT                                                                                                        \
+#define CHANNEL_STATUS_DEFAULT                                                                                                        \
     cs.defaults.emplace_back();                                                                                        \
     cs.defaults.back() = [&]()
