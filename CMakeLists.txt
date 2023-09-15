@@ -47,7 +47,7 @@ add_subdirectory(3rdparty/libyuv)
 
 
 ##
-## conan libraries
+## Conan packages
 ##
 if (NOT DEFINED CONAN_ALREADY_SETUP)
     include(cmake-build-debug/conanbuildinfo.cmake)
@@ -132,7 +132,6 @@ target_include_directories(human_card PRIVATE
         ${CMAKE_SOURCE_DIR}/3rdparty/cppchannel
         ${CMAKE_SOURCE_DIR}/video
         ${FFMPEG_INCLUDE_DIRS}
-        # ${CMAKE_CURRENT_SOURCE_DIR}/../../cpp/donde-toolkits/install/include
 )
 
 
@@ -148,7 +147,7 @@ target_link_libraries(human_card PRIVATE
 )
 
 ##
-## conan packages
+## Conan packages
 ##
 target_link_libraries(human_card PRIVATE
         ${CONAN_LIBs}
@@ -159,6 +158,8 @@ target_link_libraries(human_card PRIVATE
 target_include_directories(human_card BEFORE PRIVATE
         ${CONAN_INCLUDE_DIRS}
 )
+
+
 
 set_target_properties(human_card PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
