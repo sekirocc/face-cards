@@ -21,13 +21,12 @@ find_package(Qt${QT_VERSION_MAJOR}
         OPTIONAL_COMPONENTS Multimedia MultimediaWidgets)
 
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
 
 ##
 ## Find FFMPEG include directories and link libraries.
 ##
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules ${CMAKE_MODULE_PATH})
 find_package(FFMPEG REQUIRED)
-
 message("FFMPEG_LIBRARIES ${FFMPEG_LIBRARIES}")
 message("FFMPEG_INCLUDE_DIRS ${FFMPEG_INCLUDE_DIRS}")
 
@@ -41,7 +40,9 @@ message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
 find_package(DondeToolkits CONFIG REQUIRED)
 
 
+##
 ## google libyuv
+##
 add_subdirectory(3rdparty/libyuv)
 
 
@@ -139,12 +140,24 @@ target_link_libraries(human_card PRIVATE
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Multimedia
         Qt${QT_VERSION_MAJOR}::MultimediaWidgets
-        yuv
         ${FFMPEG_LIBRARIES}
-        donde::DondeToolkits
-        ${CONAN_LIBs}
-        openvino::runtime
         ${OpenCV_LIBS}
+        openvino::runtime
+        yuv
+        donde::DondeToolkits
+)
+
+##
+## conan packages
+##
+target_link_libraries(human_card PRIVATE
+        ${CONAN_LIBs}
+)
+###
+### the `BEFORE` Important! conan include dirs must BEFORE system (-isysroot)
+###
+target_include_directories(human_card BEFORE PRIVATE
+        ${CONAN_INCLUDE_DIRS}
 )
 
 set_target_properties(human_card PROPERTIES

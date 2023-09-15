@@ -5,6 +5,9 @@
 
 #include <QApplication>
 
+using json = nlohmann::json;
+using donde_toolkits::feature_extract::FacePipeline;
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -41,7 +44,7 @@ int main(int argc, char *argv[])
     }
 )"_json;
 
-    donde_toolkits::feature_extract::FacePipeline pipeline{conf};
+    FacePipeline pipeline{conf};
 
     MainWindow w{factory, controller};
     w.show();
