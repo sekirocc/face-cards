@@ -3,6 +3,7 @@ openssl/1.1.1l
 cxxopts/2.2.1
 poco/1.12.2
 zlib/1.2.12
+libyuv/1854
 
 grpc/1.48.0
 googleapis/cci.20220711

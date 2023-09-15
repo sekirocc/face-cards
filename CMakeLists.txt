@@ -40,11 +40,6 @@ message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
 find_package(DondeToolkits CONFIG REQUIRED)
 
 
-##
-## google libyuv
-##
-add_subdirectory(3rdparty/libyuv)
-
 
 ##
 ## Conan packages
@@ -56,6 +51,7 @@ if (NOT DEFINED CONAN_ALREADY_SETUP)
 endif()
 # only these libs. could add more if needed.
 set(CONAN_LIBs
+        CONAN_PKG::libyuv
         CONAN_PKG::fmt
         CONAN_PKG::nlohmann_json
         CONAN_PKG::toml11
@@ -128,7 +124,6 @@ endif()
 
 
 target_include_directories(human_card PRIVATE
-        ${CMAKE_SOURCE_DIR}/3rdparty/libyuv/include
         ${CMAKE_SOURCE_DIR}/3rdparty/cppchannel
         ${CMAKE_SOURCE_DIR}/video
         ${FFMPEG_INCLUDE_DIRS}
@@ -142,7 +137,6 @@ target_link_libraries(human_card PRIVATE
         ${FFMPEG_LIBRARIES}
         ${OpenCV_LIBS}
         openvino::runtime
-        yuv
         donde::DondeToolkits
 )
 
