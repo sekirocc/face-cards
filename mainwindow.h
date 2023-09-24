@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QtMultimediaWidgets/QVideoWidget>
+#include "media_controller.h"
 #include "picture_factory.h"
 
 QT_BEGIN_NAMESPACE

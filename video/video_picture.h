@@ -82,19 +82,19 @@ struct VideoPicture
         return true;
     }
 
-    bool Scale(SwsContext *sws_ctx, const AVFrame *originFrame)
-    {
-        frame->pts = originFrame->pts;
-        frame->key_frame = originFrame->key_frame;
-        frame->coded_picture_number = originFrame->coded_picture_number;
-        frame->display_picture_number = originFrame->display_picture_number;
-        frame->width = originFrame->width;
-        frame->height = originFrame->height;
+    // bool Scale(SwsContext *sws_ctx, const AVFrame *originFrame)
+    // {
+    //     frame->pts = originFrame->pts;
+    //     frame->key_frame = originFrame->key_frame;
+    //     frame->coded_picture_number = originFrame->coded_picture_number;
+    //     frame->display_picture_number = originFrame->display_picture_number;
+    //     frame->width = originFrame->width;
+    //     frame->height = originFrame->height;
 
-        sws_scale(sws_ctx, originFrame->data, originFrame->linesize, 0, height_, frame->data, frame->linesize);
+    //     sws_scale(sws_ctx, originFrame->data, originFrame->linesize, 0, height_, frame->data, frame->linesize);
 
-        return true;
-    }
+    //     return true;
+    // }
 
     size_t width_;
     size_t height_;

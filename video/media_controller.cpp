@@ -1,6 +1,9 @@
 #include "media_controller.h"
+#include <donde/video_process/ffmpeg_processor.h>
 
-MediaController::MediaController(VideoContext &video_ctx) : video_ctx{video_ctx} {};
+using donde_toolkits::video_process::FFmpegVideoProcessor;
+
+MediaController::MediaController(FFmpegVideoProcessor& video_ctx) : video_ctx{video_ctx} {};
 
 const MediaPlayState &MediaController::CurrentState() const
 {

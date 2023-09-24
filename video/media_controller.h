@@ -1,5 +1,6 @@
 #pragma once
 
+#include "picture_factory.h"
 #include <iostream>
 
 class VideoContext;
@@ -23,7 +24,7 @@ class MediaController
 {
 
   public:
-    MediaController(VideoContext &video_ctx);
+    MediaController(FFmpegVideoProcessor& video_ctx);
 
     const MediaPlayState &CurrentState() const;
 
@@ -39,5 +40,5 @@ class MediaController
 
     MediaPlayState state;
 
-    VideoContext &video_ctx;
+    FFmpegVideoProcessor &video_ctx;
 };
