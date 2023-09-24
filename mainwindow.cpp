@@ -14,6 +14,9 @@ MainWindow::MainWindow(
 
     video_widget = ui->video_display;
     video_sink = video_widget->videoSink();
+    // ui->startButton;
+    // ui->resumeButton;
+
 
     picture_thread = std::thread(&MainWindow::consume_picture, this);
 }

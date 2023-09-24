@@ -23,7 +23,7 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1,0">
+      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="0,1,0,0">
        <property name="sizeConstraint">
         <enum>QLayout::SetDefaultConstraint</enum>
        </property>
@@ -54,7 +54,14 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QPushButton" name="resumeButton">
+         <property name="text">
+          <string>Resume</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="startButton">
          <property name="text">
           <string>Start</string>
          </property>
@@ -225,7 +232,7 @@
      <x>0</x>
      <y>0</y>
      <width>639</width>
-     <height>33</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
