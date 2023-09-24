@@ -16,7 +16,7 @@ extern "C"
 
 struct VideoPicture
 {
-    VideoPicture(){};
+    VideoPicture(): frame(nullptr){};
 
     VideoPicture(const VideoPicture &rhs) = delete;
     VideoPicture(VideoPicture &&rhs) = delete;

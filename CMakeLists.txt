@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 
 project(human_card VERSION 0.1 LANGUAGES CXX)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(PROJECT_NAME human_card)
 
 
 set(CMAKE_AUTOUIC ON)
@@ -14,6 +16,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 ## QT6
 ##
 
+set(CMAKE_PREFIX_PATH "/home/chenjie/Qt6/6.5.2/gcc_64/" ${CMAKE_PREFIX_PATH})
+message("CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 find_package(QT NAMES Qt6 Qt5
         REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR}
@@ -41,23 +45,6 @@ find_package(DondeToolkits CONFIG REQUIRED)
 
 
 
-##
-## Conan packages
-##
-if (NOT DEFINED CONAN_ALREADY_SETUP)
-    include(cmake-build-debug/conanbuildinfo.cmake)
-    conan_basic_setup(TARGETS)
-    set(CONAN_ALREADY_SETUP true)
-endif()
-# only these libs. could add more if needed.
-set(CONAN_LIBs
-        CONAN_PKG::libyuv
-        CONAN_PKG::fmt
-        CONAN_PKG::nlohmann_json
-        CONAN_PKG::toml11
-        CONAN_PKG::msgpack
-        CONAN_PKG::poco
-)
 
 ##
 ## OpenVINO library
@@ -138,19 +125,36 @@ target_link_libraries(human_card PRIVATE
         ${OpenCV_LIBS}
         openvino::runtime
         donde::DondeToolkits
-)
+    )
+
 
 ##
-## Conan packages
+## Conan
 ##
-target_link_libraries(human_card PRIVATE
-        ${CONAN_LIBs}
+set(CMAKE_PREFIX_PATH "build" ${CMAKE_PREFIX_PATH})
+find_package(fmt REQUIRED)
+find_package(spdlog REQUIRED)
+find_package(Poco REQUIRED)
+find_package(SQLiteCpp REQUIRED)
+find_package(stduuid REQUIRED)
+find_package(nlohmann_json REQUIRED)
+find_package(cassandra-cpp-driver REQUIRED)
+target_link_libraries(${PROJECT_NAME}
+    PRIVATE
+    fmt::fmt
+    spdlog::spdlog
+    Poco::Poco
+    #### msgpack::msgpack
+    SQLiteCpp
+    stduuid::stduuid
+    #### libuuid::libuuid
+    nlohmann_json::nlohmann_json
+    cassandra-cpp-driver::cassandra-cpp-driver
 )
-###
-### the `BEFORE` Important! conan include dirs must BEFORE system (-isysroot)
-###
-target_include_directories(human_card BEFORE PRIVATE
-        ${CONAN_INCLUDE_DIRS}
+target_include_directories(${PROJECT_NAME}
+    BEFORE
+    PRIVATE
+    ${CONAN_INCLUDE_DIRS}
 )
 
 
