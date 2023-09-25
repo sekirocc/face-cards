@@ -2,7 +2,6 @@
 #include "donde/video_process/ffmpeg_processor.h"
 #include "mainwindow.h"
 #include "picture_factory.h"
-#include "video_context.h"
 
 #include <QApplication>
 
@@ -18,7 +17,6 @@ int main(int argc, char* argv[]) {
     PictureFactory factory{p, 20};
     p.Process();
 
-    VideoContext video_ctx{"/tmp/Iron_Man-Trailer_HD.mp4"};
     MediaController controller{p};
 
     json conf = R"(
@@ -54,6 +52,5 @@ int main(int argc, char* argv[]) {
     MainWindow w{factory, controller};
     w.show();
 
-    video_ctx.Process();
     return a.exec();
 }

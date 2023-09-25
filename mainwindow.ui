@@ -36,7 +36,7 @@
           <string notr="true">background: green; color: white; font-weight: bold</string>
          </property>
          <property name="text">
-          <string>video information</string>
+          <string>video:</string>
          </property>
         </widget>
        </item>
@@ -132,7 +132,7 @@
            <height>0</height>
           </size>
          </property>
-         <layout class="QVBoxLayout" name="verticalLayout" stretch="0">
+         <layout class="QVBoxLayout" name="verticalLayout" stretch="1,1">
           <property name="sizeConstraint">
            <enum>QLayout::SetDefaultConstraint</enum>
           </property>
@@ -149,19 +149,25 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QListView" name="faces_list">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>100</width>
-              <height>0</height>
-             </size>
-            </property>
+           <widget class="QWidget" name="detection_humans" native="true">
+            <layout class="QVBoxLayout" name="verticalLayout_5">
+             <item>
+              <widget class="QListWidget" name="human_face_list_1"/>
+             </item>
+            </layout>
+           </widget>
+          </item>
+          <item>
+           <widget class="QWidget" name="detection_face" native="true">
+            <layout class="QVBoxLayout" name="verticalLayout_4">
+             <item>
+              <widget class="QLabel" name="label_2">
+               <property name="text">
+                <string>TextLabel</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
          </layout>
@@ -178,7 +184,7 @@
         <verstretch>0</verstretch>
        </sizepolicy>
       </property>
-      <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0,1">
+      <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,1">
        <property name="sizeConstraint">
         <enum>QLayout::SetDefaultConstraint</enum>
        </property>
@@ -186,30 +192,30 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QLabel" name="label_5">
-         <property name="styleSheet">
-          <string notr="true">background: green; color: white; font-weight: bold</string>
-         </property>
-         <property name="text">
-          <string>video information</string>
-         </property>
+        <widget class="QWidget" name="widget" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <item>
+           <widget class="QLabel" name="video_progress_text">
+            <property name="styleSheet">
+             <string notr="true">background: green; color: white; font-weight: bold</string>
+            </property>
+            <property name="text">
+             <string>Progress</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QProgressBar" name="video_process_progressbar">
+            <property name="value">
+             <number>24</number>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>
-        <spacer name="horizontalSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QLabel" name="label_6">
+        <widget class="QLabel" name="detection_infomation">
          <property name="autoFillBackground">
           <bool>false</bool>
          </property>
@@ -217,7 +223,7 @@
           <string notr="true">background: red; color: white; font-weight: bold</string>
          </property>
          <property name="text">
-          <string>TextLabel</string>
+          <string>detected face!</string>
          </property>
         </widget>
        </item>

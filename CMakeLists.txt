@@ -64,8 +64,6 @@ message("OpenCV_LIBS: ${OpenCV_LIBS}")
 
 
 set(VIDEO_SOURCES
-        video/video_context.cpp
-        video/video_context.h
         video/picture_factory.h
         video/video_picture.h
         video/media_controller.h
