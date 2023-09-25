@@ -16,7 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 ## QT6
 ##
 
-set(CMAKE_PREFIX_PATH "/home/chenjie/Qt6/6.5.2/gcc_64/" ${CMAKE_PREFIX_PATH})
+set(CMAKE_PREFIX_PATH "/opt/Qt6/6.5.2/gcc_64/" ${CMAKE_PREFIX_PATH})
 message("CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 find_package(QT NAMES Qt6 Qt5
         REQUIRED COMPONENTS Widgets)
