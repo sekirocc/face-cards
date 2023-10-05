@@ -16,7 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 ## QT6
 ##
 
-set(CMAKE_PREFIX_PATH "/opt/Qt6/6.5.2/gcc_64/" ${CMAKE_PREFIX_PATH})
+set(CMAKE_PREFIX_PATH "/opt/Qt/6.5.3/gcc_64" ${CMAKE_PREFIX_PATH})
 message("CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 find_package(QT NAMES Qt6 Qt5
         REQUIRED COMPONENTS Widgets)
@@ -134,9 +134,7 @@ find_package(fmt REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(Poco REQUIRED)
 find_package(SQLiteCpp REQUIRED)
-find_package(stduuid REQUIRED)
 find_package(nlohmann_json REQUIRED)
-find_package(cassandra-cpp-driver REQUIRED)
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
     fmt::fmt
@@ -144,10 +142,7 @@ target_link_libraries(${PROJECT_NAME}
     Poco::Poco
     #### msgpack::msgpack
     SQLiteCpp
-    stduuid::stduuid
-    #### libuuid::libuuid
     nlohmann_json::nlohmann_json
-    cassandra-cpp-driver::cassandra-cpp-driver
 )
 target_include_directories(${PROJECT_NAME}
     BEFORE
