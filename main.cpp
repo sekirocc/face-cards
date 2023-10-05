@@ -9,14 +9,13 @@ using json = nlohmann::json;
 using donde_toolkits::feature_extract::FacePipeline;
 using donde_toolkits::video_process::FFmpegVideoFrameProcessor;
 using donde_toolkits::video_process::FFmpegVideoProcessor;
+using donde_toolkits::video_process::ProcessOptions;
 
 int main(int argc, char* argv[]) {
     QApplication a(argc, argv);
 
     FFmpegVideoProcessor p{"/tmp/Iron_Man-Trailer_HD.mp4"};
     PictureFactory factory{p, 20};
-    p.Process();
-
     MediaController controller{p};
 
     json conf = R"(
@@ -51,6 +50,14 @@ int main(int argc, char* argv[]) {
 
     MainWindow w{factory, controller};
     w.show();
+
+    ProcessOptions opts{
+        .warm_up_frames = 0,
+        .skip_frames = 1,
+        .decode_fps = 400,
+        .loop_forever = true,
+    };
+    p.Process(opts);
 
     return a.exec();
 }

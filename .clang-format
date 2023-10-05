@@ -17,4 +17,6 @@
   BreakBeforeBinaryOperators: All
   BreakBeforeTernaryOperators: 'true'
   NamespaceIndentation: None
+  BinPackArguments: false
+  BinPackParameters: false
 

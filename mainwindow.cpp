@@ -1,16 +1,18 @@
 #include "mainwindow.h"
-#include "libyuv.h"
 
 #include "./ui_mainwindow.h"
+#include "libyuv.h"
 
 #include <QVideoFrame>
 #include <QVideoFrameFormat>
 #include <QVideoSink>
+#include <fmt/format.h>
 #include <iostream>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgproc.hpp>
 
-MainWindow::MainWindow(PictureFactory& pictureFactory, MediaController& mediaController,
+MainWindow::MainWindow(PictureFactory& pictureFactory,
+                       MediaController& mediaController,
                        QWidget* parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow),
@@ -36,53 +38,48 @@ MainWindow::~MainWindow() { delete ui; }
 void MainWindow::consume_picture() {
     while (true) {
         VideoPicture& pic = picture_factory.next();
-        std::cout << "get picture from factory: id: " << pic.Id() << ", width: " << pic.Width()
-                  << std::endl;
         cv::Mat mat(pic.Height(), pic.Width(), CV_8UC3, pic.frame->data[0], pic.frame->linesize[0]);
-        display_picture(mat);
+
+        // draw frame id
+        std::string picId = fmt::format("{}", pic.id_);
+        cv::Point posi{100, 100};
+        int face = cv::FONT_HERSHEY_PLAIN;
+        double scale = 2;
+        cv::Scalar color{255, 0, 0}; // blue, BGR
+        cv::putText(mat, picId, posi, face, scale, color, 2);
+
+        display_cv_image(mat);
     }
 }
 
-void MainWindow::display_picture(const cv::Mat& mat) {
-    printf("mat: %d x %d \n", mat.cols, mat.rows);
-    QImage img((uchar*)mat.data, mat.cols, mat.rows, QImage::Format_BGR888);
+void MainWindow::display_cv_image(const cv::Mat& mat) {
+    QImage imgBGR((uchar*)mat.data, mat.cols, mat.rows, QImage::Format_BGR888);
+    QImage imageARBG = imgBGR.convertToFormat(QImage::Format_ARGB32);
 
-    img = img.convertToFormat(QImage::Format_ARGB32);
-    auto fmt = QVideoFrameFormat(img.size(), QVideoFrameFormat::Format_YUV420P);
+    auto fmt = QVideoFrameFormat(imageARBG.size(), QVideoFrameFormat::Format_YUV420P);
     QVideoFrame frame(fmt);
     if (!frame.map(QVideoFrame::ReadWrite)) {
-        std::cout << "cannot map frame." << std::endl;
+        std::cout << "cann't map frame." << std::endl;
+        return;
     }
-    int width = img.width();
-    int height = img.height();
+    int width = imageARBG.width();
+    int height = imageARBG.height();
 
-    std::cout << "width: " << width << std::endl;
-    std::cout << "height: " << height << std::endl;
-    std::cout << "frame.bytesPerLine(0): " << frame.bytesPerLine(0) << std::endl;
-    std::cout << "frame.bytesPerLine(1): " << frame.bytesPerLine(1) << std::endl;
-    std::cout << "frame.bytesPerLine(2): " << frame.bytesPerLine(2) << std::endl;
-
-    libyuv::ARGBToI420((const uint8_t* )img.bits(),
-               img.bytesPerLine(),
-
-               frame.bits(0),
-               frame.bytesPerLine(0),
-               // width * height,
-
-               frame.bits(1),
-               frame.bytesPerLine(1),
-               // width / 2,
-
-               frame.bits(2),
-               frame.bytesPerLine(2),
-               // width / 2,
-
-               width,
-               height);
+    libyuv::ARGBToI420((const uint8_t*)imageARBG.bits(),
+                       imageARBG.bytesPerLine(),
+                       frame.bits(0),
+                       frame.bytesPerLine(0),
+                       frame.bits(1),
+                       frame.bytesPerLine(1),
+                       frame.bits(2),
+                       frame.bytesPerLine(2),
+                       width,
+                       height);
     frame.unmap();
     video_display_sink->setVideoFrame(frame);
 }
 
+// deprecated.
 void MainWindow::display_picture(const VideoPicture& pic) {
     QSize size(pic.Width(), pic.Height());
     QVideoFrame frame;

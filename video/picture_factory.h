@@ -31,7 +31,7 @@ class PictureFactory {
         video_ctx.Register(p);
 
         // for stat.
-        record_frames = 0;
+        frames_per_second = 0;
         record_time = std::chrono::steady_clock::now();
     };
 
@@ -39,12 +39,13 @@ class PictureFactory {
 
     bool consume(const donde_toolkits::video_process::FFmpegVideoFrame* vf) {
         const AVFrame* f = (const AVFrame*)vf->getFrame();
-        record_frames++;
+
+        frames_per_second++;
         auto now = std::chrono::steady_clock::now();
         if (std::chrono::duration_cast<std::chrono::milliseconds>(now - record_time).count()
             >= 1000) {
-            std::cout << "picture display: fps: " << record_frames << std::endl;
-            record_frames = 0;
+            std::cout << "fps: " << frames_per_second << ", frame id: " << vf->getFrameId() << std::endl;
+            frames_per_second = 0;
             record_time = now;
         }
 
@@ -55,7 +56,7 @@ class PictureFactory {
 
         video_ctx.ScaleFrame(f, pic.frame);
 
-        pic.id_ = frames_processed_++;
+        pic.id_ = vf->getFrameId();
 
         write_index++;
         if (write_index == pictures_len) {
@@ -90,6 +91,6 @@ class PictureFactory {
     int write_index = 0;
     int read_index = 0;
 
-    int record_frames;
+    int frames_per_second;
     std::chrono::steady_clock::time_point record_time;
 };

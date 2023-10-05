@@ -28,7 +28,7 @@ class MainWindow : public QMainWindow {
   private:
     void consume_picture();
 
-    void display_picture(const cv::Mat& mat);
+    void display_cv_image(const cv::Mat& mat);
     void display_picture(const VideoPicture& pic);
 
   private:
