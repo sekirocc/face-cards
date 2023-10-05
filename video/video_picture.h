@@ -16,7 +16,7 @@ extern "C"
 
 struct VideoPicture
 {
-    VideoPicture(): frame(nullptr){};
+    VideoPicture(): frame(nullptr), id_(0){};
 
     VideoPicture(const VideoPicture &rhs) = delete;
     VideoPicture(VideoPicture &&rhs) = delete;
@@ -42,6 +42,10 @@ struct VideoPicture
     int Width() const
     {
         return width_;
+    }
+    long Id() const
+    {
+        return id_;
     }
 
     bool CreateFrame(int width, int height, AVPixelFormat pix_fmt)
@@ -96,6 +100,7 @@ struct VideoPicture
     //     return true;
     // }
 
+    long id_;
     size_t width_;
     size_t height_;
     AVPixelFormat pix_fmt_;

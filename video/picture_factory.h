@@ -50,12 +50,13 @@ class PictureFactory {
 
         VideoPicture& pic = pictures[write_index];
         if (!pic.HasFrame() || pic.Height() != f->height || pic.Width() != f->width) {
-            pic.CreateFrame(f->width, f->height, AV_PIX_FMT_YUV420P);
+            pic.CreateFrame(f->width, f->height, AV_PIX_FMT_BGR24);
         }
 
         video_ctx.ScaleFrame(f, pic.frame);
 
-        frames_processed_++;
+        pic.id_ = frames_processed_++;
+
         write_index++;
         if (write_index == pictures_len) {
             write_index = 0;

@@ -6,6 +6,7 @@
 
 #include <QMainWindow>
 #include <QtMultimediaWidgets/QVideoWidget>
+#include <opencv2/core/mat.hpp>
 #include <qprogressbar.h>
 #include <qpushbutton.h>
 
@@ -26,6 +27,8 @@ class MainWindow : public QMainWindow {
 
   private:
     void consume_picture();
+
+    void display_picture(const cv::Mat& mat);
     void display_picture(const VideoPicture& pic);
 
   private:

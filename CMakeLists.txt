@@ -9,6 +9,9 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+set(CMAKE_C_COMPILER "/usr/bin/clang")
+set(CMAKE_CXX_COMPILER "/usr/bin/clang++")
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -135,6 +138,7 @@ find_package(spdlog REQUIRED)
 find_package(Poco REQUIRED)
 find_package(SQLiteCpp REQUIRED)
 find_package(nlohmann_json REQUIRED)
+find_package(libyuv REQUIRED)
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
     fmt::fmt
@@ -142,6 +146,7 @@ target_link_libraries(${PROJECT_NAME}
     Poco::Poco
     #### msgpack::msgpack
     SQLiteCpp
+    libyuv::libyuv
     nlohmann_json::nlohmann_json
 )
 target_include_directories(${PROJECT_NAME}
