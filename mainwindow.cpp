@@ -24,14 +24,18 @@ MainWindow::MainWindow(PictureFactory& pictureFactory,
     video_display_widget = ui->video_display;
     video_display_sink = video_display_widget->videoSink();
 
-    btn_pause_resume = ui->resumeButton;
-    btn_start = ui->startButton;
-    pgb_video_process = ui->video_process_progressbar;
+    txt_video_filepath = ui->txt_video_filepath;
+    btn_stop = ui->btn_stop;
+    btn_start = ui->btn_start;
+    pgb_video_process = ui->pgb_video_process;
 
     // ui->startButton;
     // ui->resumeButton;
 
     picture_thread = std::thread([&] { display_picture(); });
+
+    connect(btn_start, &QPushButton::clicked, this, &MainWindow::onStartBtnClicked);
+    connect(btn_stop, &QPushButton::clicked, this, &MainWindow::onStopBtnClicked);
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -115,15 +119,55 @@ void MainWindow::display_picture(const VideoPicture& pic) {
     video_display_sink->setVideoFrame(frame);
 }
 
-void MainWindow::SetVideoOpenSuccess(bool succ){
+void MainWindow::onStartBtnClicked() {
+    auto currentState = media_controller.CurrentState();
+
+    switch (currentState.playing_status) {
+
+    case PlayingStatus::NOT_STARTED:
+    case PlayingStatus::FINISHED:
+    case PlayingStatus::STOPPED: {
+        // use brackets to avoid "crosses initialization error"
+
+        std::string filepath = txt_video_filepath->text().toStdString();
+        if (filepath.empty()) {
+            std::cerr << "please input video filepath" << std::endl;
+            return;
+        }
+
+        auto info = media_controller.Reload(filepath);
+
+        SetVideoOpenSuccess(info.open_success);
+        SetVideoTotalFrames(info.nb_frames);
+        SetVideoDurationSeconds(info.duration_s);
+
+        media_controller.Start();
+        btn_start->setText("Pause");
+        break;
+    }
+
+    case PlayingStatus::PLAYING:
+        media_controller.Pause();
+        btn_start->setText("Resume");
+        break;
+
+    case PlayingStatus::PAUSED:
+        media_controller.Resume();
+        btn_start->setText("Pause");
+        break;
+    }
+}
+
+void MainWindow::onStopBtnClicked() {
+    media_controller.Stop();
+    btn_start->setText("Start");
+}
+
+void MainWindow::SetVideoOpenSuccess(bool succ) {
     video_open_success = succ;
     if (!video_open_success) {
         // TODO do what?
     }
 };
-void MainWindow::SetVideoDurationSeconds(int64_t duration){
-    video_duration_s = duration;
-};
-void MainWindow::SetVideoTotalFrames(int64_t total_frames){
-    video_total_frames = total_frames;
-};
+void MainWindow::SetVideoDurationSeconds(int64_t duration) { video_duration_s = duration; };
+void MainWindow::SetVideoTotalFrames(int64_t total_frames) { video_total_frames = total_frames; };

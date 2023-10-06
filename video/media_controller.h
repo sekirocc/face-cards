@@ -1,13 +1,23 @@
 #pragma once
 
 #include "picture_factory.h"
+
 #include <iostream>
+
+using donde_toolkits::video_process::VideoStreamInfo;
 
 class VideoContext;
 
-struct MediaPlayState
-{
-    bool is_playing;
+enum class PlayingStatus {
+    NOT_STARTED,
+    PLAYING,
+    PAUSED,
+    STOPPED,
+    FINISHED,
+};
+
+struct MediaPlayState {
+    PlayingStatus playing_status;
 
     size_t window_width;
     size_t window_height;
@@ -20,25 +30,24 @@ struct MediaPlayState
     size_t media_duration;
 };
 
-class MediaController
-{
+class MediaController {
 
   public:
     MediaController(FFmpegVideoProcessor& video_ctx);
 
-    const MediaPlayState &CurrentState() const;
+    const MediaPlayState& CurrentState() const { return state; };
 
-    bool Reload(std::string filename);
+    VideoStreamInfo Reload(const std::string& filename);
+
+    bool Start();
     bool Pause();
     bool Resume();
-
-    bool Terminate();
+    bool Stop();
 
     bool Forward(int step);
     bool Backward(int step);
     bool Seek(int position);
 
     MediaPlayState state;
-
-    FFmpegVideoProcessor &video_ctx;
+    FFmpegVideoProcessor& video_processor;
 };

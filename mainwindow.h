@@ -7,6 +7,7 @@
 #include <QMainWindow>
 #include <QtMultimediaWidgets/QVideoWidget>
 #include <opencv2/core/mat.hpp>
+#include <qabstractspinbox.h>
 #include <qprogressbar.h>
 #include <qpushbutton.h>
 
@@ -29,11 +30,16 @@ class MainWindow : public QMainWindow {
     void SetVideoDurationSeconds(int64_t);
     void SetVideoTotalFrames(int64_t);
 
+
   private:
     void display_picture();
 
     void display_cv_image(const cv::Mat& mat);
     void display_picture(const VideoPicture& pic);
+
+  private slots:
+    void onStartBtnClicked();
+    void onStopBtnClicked();
 
   private:
     Ui::MainWindow* ui;
@@ -41,7 +47,9 @@ class MainWindow : public QMainWindow {
     QVideoWidget* video_display_widget;
     QVideoSink* video_display_sink;
 
-    QPushButton* btn_pause_resume;
+    QLineEdit* txt_video_filepath;
+
+    QPushButton* btn_stop;
     QPushButton* btn_start;
 
     QProgressBar* pgb_video_process;
