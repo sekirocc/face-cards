@@ -21,14 +21,14 @@ using donde_toolkits::video_process::FFmpegVideoProcessor;
 
 class PictureFactory {
   public:
-    PictureFactory(FFmpegVideoProcessor& video_ctx, size_t pictures_len = 20)
-        : video_ctx{video_ctx}, pictures_len(pictures_len), output_ch{pictures_len} {
+    PictureFactory(FFmpegVideoProcessor& video_processor, size_t pictures_len = 20)
+        : video_processor_{video_processor}, pictures_len(pictures_len), output_ch{pictures_len} {
         pictures = new VideoPicture[pictures_len];
 
         FFmpegVideoFrameProcessor p(
             std::bind(&PictureFactory::consume, this, std::placeholders::_1));
 
-        video_ctx.Register(p);
+        video_processor.Register(p);
 
         // for stat.
         frames_per_second = 0;
@@ -54,7 +54,7 @@ class PictureFactory {
             pic.CreateFrame(f->width, f->height, AV_PIX_FMT_BGR24);
         }
 
-        video_ctx.ScaleFrame(f, pic.frame);
+        video_processor_.ScaleFrame(f, pic.frame);
 
         pic.id_ = vf->getFrameId();
 
@@ -81,7 +81,7 @@ class PictureFactory {
   private:
     int frames_processed_ = 0;
 
-    const FFmpegVideoProcessor& video_ctx;
+    const FFmpegVideoProcessor& video_processor_;
 
     VideoPicture* pictures;
     int pictures_len;

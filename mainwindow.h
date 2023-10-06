@@ -25,8 +25,12 @@ class MainWindow : public QMainWindow {
 
     ~MainWindow();
 
+    void SetVideoOpenSuccess(bool);
+    void SetVideoDurationSeconds(int64_t);
+    void SetVideoTotalFrames(int64_t);
+
   private:
-    void consume_picture();
+    void display_picture();
 
     void display_cv_image(const cv::Mat& mat);
     void display_picture(const VideoPicture& pic);
@@ -37,14 +41,18 @@ class MainWindow : public QMainWindow {
     QVideoWidget* video_display_widget;
     QVideoSink* video_display_sink;
 
-    QPushButton* pause_resume_btn;
-    QPushButton* start_btn;
+    QPushButton* btn_pause_resume;
+    QPushButton* btn_start;
 
-    QProgressBar* video_process_progressbar;
+    QProgressBar* pgb_video_process;
 
     std::thread picture_thread;
     PictureFactory& picture_factory;
     MediaController& media_controller;
+
+    bool video_open_success;
+    int64_t video_duration_s;
+    int64_t video_total_frames;
 };
 
 #endif // MAINWINDOW_H

@@ -24,18 +24,19 @@ MainWindow::MainWindow(PictureFactory& pictureFactory,
     video_display_widget = ui->video_display;
     video_display_sink = video_display_widget->videoSink();
 
-    pause_resume_btn = ui->resumeButton;
-    start_btn = ui->startButton;
-    video_process_progressbar = ui->video_process_progressbar;
+    btn_pause_resume = ui->resumeButton;
+    btn_start = ui->startButton;
+    pgb_video_process = ui->video_process_progressbar;
+
     // ui->startButton;
     // ui->resumeButton;
 
-    picture_thread = std::thread(&MainWindow::consume_picture, this);
+    picture_thread = std::thread([&] { display_picture(); });
 }
 
 MainWindow::~MainWindow() { delete ui; }
 
-void MainWindow::consume_picture() {
+void MainWindow::display_picture() {
     while (true) {
         VideoPicture& pic = picture_factory.next();
         cv::Mat mat(pic.Height(), pic.Width(), CV_8UC3, pic.frame->data[0], pic.frame->linesize[0]);
@@ -47,6 +48,9 @@ void MainWindow::consume_picture() {
         double scale = 2;
         cv::Scalar color{255, 0, 0}; // blue, BGR
         cv::putText(mat, picId, posi, face, scale, color, 2);
+
+        int progress = pic.id_ * 100 / video_total_frames;
+        pgb_video_process->setValue(progress);
 
         display_cv_image(mat);
     }
@@ -110,3 +114,16 @@ void MainWindow::display_picture(const VideoPicture& pic) {
 
     video_display_sink->setVideoFrame(frame);
 }
+
+void MainWindow::SetVideoOpenSuccess(bool succ){
+    video_open_success = succ;
+    if (!video_open_success) {
+        // TODO do what?
+    }
+};
+void MainWindow::SetVideoDurationSeconds(int64_t duration){
+    video_duration_s = duration;
+};
+void MainWindow::SetVideoTotalFrames(int64_t total_frames){
+    video_total_frames = total_frames;
+};

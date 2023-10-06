@@ -10,6 +10,7 @@ using donde_toolkits::feature_extract::FacePipeline;
 using donde_toolkits::video_process::FFmpegVideoFrameProcessor;
 using donde_toolkits::video_process::FFmpegVideoProcessor;
 using donde_toolkits::video_process::ProcessOptions;
+using donde_toolkits::video_process::VideoStreamInfo;
 
 int main(int argc, char* argv[]) {
     QApplication a(argc, argv);
@@ -54,10 +55,13 @@ int main(int argc, char* argv[]) {
     ProcessOptions opts{
         .warm_up_frames = 0,
         .skip_frames = 1,
-        .decode_fps = 400,
+        .decode_fps = 60,
         .loop_forever = true,
     };
-    p.Process(opts);
+    VideoStreamInfo info = p.Process(opts);
+    w.SetVideoOpenSuccess(info.open_success);
+    w.SetVideoTotalFrames(info.nb_frames);
+    w.SetVideoDurationSeconds(info.duration_s);
 
     return a.exec();
 }
