@@ -15,7 +15,7 @@ bool MediaController::Start() {
     video_processor.Process({
         .warm_up_frames = 0,
         .skip_frames = 1,
-        .decode_fps = 60,
+        .decode_fps = 30,
         .loop_forever = true,
     });
 

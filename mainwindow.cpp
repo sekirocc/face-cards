@@ -13,11 +13,13 @@
 
 MainWindow::MainWindow(PictureFactory& pictureFactory,
                        MediaController& mediaController,
+                       FacePipeline& facePipeline,
                        QWidget* parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow),
       media_controller(mediaController),
-      picture_factory(pictureFactory) {
+      picture_factory(pictureFactory),
+      face_pipeline(facePipeline) {
 
     ui->setupUi(this);
 
@@ -32,9 +34,9 @@ MainWindow::MainWindow(PictureFactory& pictureFactory,
     // ui->startButton;
     // ui->resumeButton;
 
-    display_default_cover();
+    show_video_cover();
 
-    picture_thread = std::thread([&] { display_picture(); });
+    picture_thread = std::thread([&] { loop_video_pictures(); });
 
     connect(btn_start, &QPushButton::clicked, this, &MainWindow::onStartBtnClicked);
     connect(btn_stop, &QPushButton::clicked, this, &MainWindow::onStopBtnClicked);
@@ -42,14 +44,14 @@ MainWindow::MainWindow(PictureFactory& pictureFactory,
 
 MainWindow::~MainWindow() { delete ui; }
 
-void MainWindow::display_default_cover() {
+void MainWindow::show_video_cover() {
     QImage cover("://resources/images/video_cover.png");
     QImage imageARBG = cover.convertToFormat(QImage::Format_ARGB32);
 
     display_arbg_image(imageARBG);
 }
 
-void MainWindow::display_picture() {
+void MainWindow::loop_video_pictures() {
     while (true) {
         VideoPicture& pic = picture_factory.next();
         cv::Mat mat(pic.Height(), pic.Width(), CV_8UC3, pic.frame->data[0], pic.frame->linesize[0]);
@@ -61,6 +63,15 @@ void MainWindow::display_picture() {
         double scale = 2;
         cv::Scalar color{255, 0, 0}; // blue, BGR
         cv::putText(mat, picId, posi, face, scale, color, 2);
+
+        // detect face
+        std::shared_ptr<donde_toolkits::DetectResult> detect_result = face_pipeline.Detect(mat);
+        for (auto& face : detect_result->faces) {
+            if (face.confidence > 0.8) {
+                cv::Rect box = face.box;
+                cv::rectangle(mat, box.tl(), box.br(), cv::Scalar(0, 255, 0));
+            }
+        }
 
         int progress = pic.id_ * 100 / video_total_frames;
         pgb_video_process->setValue(progress);
@@ -77,7 +88,6 @@ void MainWindow::display_cv_image(const cv::Mat& mat) {
 }
 
 void MainWindow::display_arbg_image(const QImage& imageARBG) {
-
     auto fmt = QVideoFrameFormat(imageARBG.size(), QVideoFrameFormat::Format_YUV420P);
     QVideoFrame frame(fmt);
     if (!frame.map(QVideoFrame::ReadWrite)) {

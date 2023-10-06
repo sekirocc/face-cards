@@ -1,4 +1,5 @@
 #include "donde/feature_extract/face_pipeline.h"
+#include "donde/feature_extract/processor_factory.h"
 #include "donde/video_process/ffmpeg_processor.h"
 #include "mainwindow.h"
 #include "picture_factory.h"
@@ -9,7 +10,6 @@ using json = nlohmann::json;
 using donde_toolkits::feature_extract::FacePipeline;
 using donde_toolkits::video_process::FFmpegVideoFrameProcessor;
 using donde_toolkits::video_process::FFmpegVideoProcessor;
-using donde_toolkits::video_process::VideoStreamInfo;
 
 int main(int argc, char* argv[]) {
     QApplication a(argc, argv);
@@ -21,34 +21,20 @@ int main(int argc, char* argv[]) {
           "device_id": "CPU",
           "model": "./contrib/models/face-detection-adas-0001.xml",
           "warmup": false
-        },
-        "landmarks": {
-          "concurrent": 1,
-          "device_id": "CPU",
-          "model": "./contrib/models/facial-landmarks-35-adas-0002.xml",
-          "warmup": false
-        },
-        "aligner": {
-          "concurrent": 1,
-          "device_id": "CPU",
-          "warmup": false
-        },
-        "feature": {
-          "concurrent": 1,
-          "device_id": "CPU",
-          "model": "./contrib/models/Sphereface.xml",
-          "warmup": false
         }
     }
 )"_json;
 
+    // init face pipeline, with detector only.
     FacePipeline pipeline{conf};
+    auto detector = donde_toolkits::feature_extract::ProcessorFactory::createDetector();
+    pipeline.Init(detector, nullptr, nullptr, nullptr);
 
     FFmpegVideoProcessor p{};
     PictureFactory factory{p};
     MediaController controller{p};
 
-    MainWindow w{factory, controller};
+    MainWindow w{factory, controller, pipeline};
     w.show();
 
     return a.exec();
