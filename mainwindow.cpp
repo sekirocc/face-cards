@@ -32,6 +32,8 @@ MainWindow::MainWindow(PictureFactory& pictureFactory,
     // ui->startButton;
     // ui->resumeButton;
 
+    display_default_cover();
+
     picture_thread = std::thread([&] { display_picture(); });
 
     connect(btn_start, &QPushButton::clicked, this, &MainWindow::onStartBtnClicked);
@@ -39,6 +41,13 @@ MainWindow::MainWindow(PictureFactory& pictureFactory,
 }
 
 MainWindow::~MainWindow() { delete ui; }
+
+void MainWindow::display_default_cover() {
+    QImage cover("://resources/images/video_cover.png");
+    QImage imageARBG = cover.convertToFormat(QImage::Format_ARGB32);
+
+    display_arbg_image(imageARBG);
+}
 
 void MainWindow::display_picture() {
     while (true) {
@@ -63,6 +72,11 @@ void MainWindow::display_picture() {
 void MainWindow::display_cv_image(const cv::Mat& mat) {
     QImage imgBGR((uchar*)mat.data, mat.cols, mat.rows, QImage::Format_BGR888);
     QImage imageARBG = imgBGR.convertToFormat(QImage::Format_ARGB32);
+
+    display_arbg_image(imageARBG);
+}
+
+void MainWindow::display_arbg_image(const QImage& imageARBG) {
 
     auto fmt = QVideoFrameFormat(imageARBG.size(), QVideoFrameFormat::Format_YUV420P);
     QVideoFrame frame(fmt);

@@ -32,9 +32,11 @@ class MainWindow : public QMainWindow {
 
 
   private:
+    void display_default_cover();
     void display_picture();
 
     void display_cv_image(const cv::Mat& mat);
+    void display_arbg_image(const QImage& imageARBG);
     void display_picture(const VideoPicture& pic);
 
   private slots:
