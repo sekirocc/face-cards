@@ -5,24 +5,8 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(PROJECT_NAME human_card)
 
 
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
-##
-## QT6
-##
-
-set(CMAKE_PREFIX_PATH "/opt/Qt/6.5.3/gcc_64" ${CMAKE_PREFIX_PATH})
-message("CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
-find_package(QT NAMES Qt6 Qt5
-        REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR}
-        REQUIRED COMPONENTS Widgets
-        OPTIONAL_COMPONENTS Multimedia MultimediaWidgets)
 
 
 
@@ -61,7 +45,27 @@ message("OpenVINO_Runtime_FOUND: ${OpenVINO_Runtime_FOUND}")
 find_package(OpenCV REQUIRED CONFIG)
 message("OpenCV_LIBS: ${OpenCV_LIBS}")
 
+##
+## SDL
+##
+find_package(SDL2 REQUIRED CONFIG)
+message("SDL2 libs: ${SDL2_LIBRARIES}")
+message("SDL2 include dir: ${SDL2_INCLUDE_DIR}")
 
+
+set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/imgui)
+
+file(GLOB IMGUI_HEADERS ${IMGUI_DIR}/*.h)
+file(GLOB IMGUI_SOURCES ${IMGUI_DIR}/*.cpp)
+
+list(APPEND IMGUI_HEADERS
+        ${IMGUI_DIR}/backends/imgui_impl_opengl3.h
+        ${IMGUI_DIR}/backends/imgui_impl_sdl2.h
+)
+list(APPEND IMGUI_SOURCES
+        ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+        ${IMGUI_DIR}/backends/imgui_impl_sdl2.cpp
+)
 
 set(VIDEO_SOURCES
         video/picture_factory.h
@@ -75,55 +79,36 @@ set(VIDEO_SOURCES
 
 set(PROJECT_SOURCES
         main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
         ${VIDEO_SOURCES}
+
+        ${IMGUI_HEADERS}
+        ${IMGUI_SOURCES}
 )
 
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(human_card
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-        images.qrc
-    )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET human_card APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
-else()
-    if(ANDROID)
-        add_library(human_card SHARED
-            ${PROJECT_SOURCES}
-        )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(human_card
-            ${PROJECT_SOURCES}
-        )
-    endif()
-endif()
-
-
+add_executable(human_card ${PROJECT_SOURCES})
 
 
 target_include_directories(human_card PRIVATE
         ${CMAKE_SOURCE_DIR}/3rdparty/cppchannel
+        ${CMAKE_SOURCE_DIR}/3rdparty/imgui
+        ${CMAKE_SOURCE_DIR}/3rdparty/imgui/backends
         ${CMAKE_SOURCE_DIR}/video
         ${FFMPEG_INCLUDE_DIRS}
+        ${SDL2_INCLUDE_DIRS}
+
 )
 
 
 target_link_libraries(human_card PRIVATE
-        Qt${QT_VERSION_MAJOR}::Widgets
-        Qt${QT_VERSION_MAJOR}::Multimedia
-        Qt${QT_VERSION_MAJOR}::MultimediaWidgets
-        ${FFMPEG_LIBRARIES}
-        ${OpenCV_LIBS}
         openvino::runtime
         donde::DondeToolkits
+
+        ${FFMPEG_LIBRARIES}
+        ${SDL2_LIBRARIES}
+        ${OpenCV_LIBS}
+
+	"-framework OpenGL"
     )
 
 
@@ -137,6 +122,7 @@ find_package(Poco REQUIRED)
 find_package(SQLiteCpp REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(libyuv REQUIRED)
+
 target_link_libraries(${PROJECT_NAME}
     PRIVATE
     fmt::fmt
@@ -147,12 +133,6 @@ target_link_libraries(${PROJECT_NAME}
     libyuv::libyuv
     nlohmann_json::nlohmann_json
 )
-target_include_directories(${PROJECT_NAME}
-    BEFORE
-    PRIVATE
-    ${CONAN_INCLUDE_DIRS}
-)
-
 
 
 set_target_properties(human_card PROPERTIES
@@ -166,7 +146,3 @@ set_target_properties(human_card PROPERTIES
 install(TARGETS human_card
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
-
-if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(human_card)
-endif()
