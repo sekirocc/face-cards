@@ -57,7 +57,6 @@ set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/imgui)
 
 file(GLOB IMGUI_HEADERS ${IMGUI_DIR}/*.h)
 file(GLOB IMGUI_SOURCES ${IMGUI_DIR}/*.cpp)
-
 list(APPEND IMGUI_HEADERS
         ${IMGUI_DIR}/backends/imgui_impl_opengl3.h
         ${IMGUI_DIR}/backends/imgui_impl_sdl2.h
@@ -67,19 +66,14 @@ list(APPEND IMGUI_SOURCES
         ${IMGUI_DIR}/backends/imgui_impl_sdl2.cpp
 )
 
-set(VIDEO_SOURCES
-        video/picture_factory.h
-        video/video_picture.h
-        video/media_controller.h
-        video/media_controller.cpp
-        3rdparty/cppchannel/channel.h
-        3rdparty/cppchannel/channel.cpp
-)
+file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/video/*.cpp)
+file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/video/*.h)
 
 
 set(PROJECT_SOURCES
         main.cpp
-        ${VIDEO_SOURCES}
+        ${SOURCES}
+        ${HEADERS}
 
         ${IMGUI_HEADERS}
         ${IMGUI_SOURCES}
