@@ -6,12 +6,15 @@
 #include <stdio.h>
 #include <SDL_opengl.h>
 #include <string>
+#include <unordered_map>
 // clang-format: on
+
+#include "people_card.h"
 
 namespace human_card {
 class Window {
    public:
-    Window();
+    Window(int width, int height);
     bool init();
     void run();
     void cleanup();
@@ -20,6 +23,8 @@ class Window {
     void render();
 
    private:
+    int width_;
+    int height_;
     SDL_Window* window;
 
     SDL_GLContext gl_context;
@@ -30,5 +35,6 @@ class Window {
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     std::string videoPath = "";
+    std::vector<PeopleCard> detectedPeopleCards;
 };
 }  // namespace human_card

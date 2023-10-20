@@ -1,9 +1,14 @@
 #include "window.h"
 #include "imgui.h"
+#include "fmt/core.h"
 
 namespace human_card {
 
-Window::Window(){};
+Window::Window(int width, int height) : width_(width), height_(height) {
+    detectedPeopleCards.push_back(PeopleCard{.name = "Alice", .show_card = false});
+    detectedPeopleCards.push_back(PeopleCard{.name = "Bob", .show_card = false});
+    detectedPeopleCards.push_back(PeopleCard{.name = "Candy", .show_card = false});
+};
 
 bool Window::init() {
     // Setup SDL
@@ -26,8 +31,8 @@ bool Window::init() {
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_WindowFlags window_flags =
         (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1280,
-                              720, window_flags);
+    window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width_,
+                              height_, window_flags);
 
     gl_context = SDL_GL_CreateContext(window);
 
@@ -93,9 +98,12 @@ void Window::render() {
     // 1. show ImageGround window.
     {
         ImGui::SetNextWindowPos(ImVec2(0, 0));
-        ImGui::SetNextWindowSize(ImVec2(500, 600));
+        ImGui::SetNextWindowSize(ImVec2(w - 200, h));
 
-        ImGui::Begin("ImageGround");
+        ImGui::Begin(
+            "ImageGround", NULL,
+            ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBringToFrontOnFocus);
+
         auto currSize = ImGui::GetWindowSize();
 
         ImGui::Text("Video Path: %s", videoPath.c_str());
@@ -105,47 +113,46 @@ void Window::render() {
 
     // 2. show Toolbar window
     {
-        ImGui::SetNextWindowPos(ImVec2(500, 0));
-        ImGui::SetNextWindowSize(ImVec2(300, 600));
-        ImGui::Begin("Detections");
-        ImGui::End();
-    }
+        ImGui::SetNextWindowPos(ImVec2(w - 200, 0));
+        ImGui::SetNextWindowSize(ImVec2(200, h));
 
-    // 2. Show a simple window that we create ourselves. We use a Begin/End pair to create a
-    // named window.
-    {
-        static float f = 0.0f;
-        static int counter = 0;
+        ImGui::Begin(
+            "Detections", NULL,
+            ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
-        ImGui::Begin("Hello, world!");  // Create a window called "Hello, world!" and append into it.
-
-        ImGui::Text("This is some useful text.");  // Display some text (you can use a format
-                                                   // strings too)
-        ImGui::Checkbox("Demo Window",
-                        &show_demo_window);  // Edit bools storing our window open/close state
-        ImGui::Checkbox("Another Window", &show_another_window);
-
-        ImGui::SliderFloat("float", &f, 0.0f, 1.0f);  // Edit 1 float using a slider from 0.0f to 1.0f
-        ImGui::ColorEdit3("clear color",
-                          (float*)&clear_color);  // Edit 3 floats representing a color
-
-        if (ImGui::Button("Button"))  // Buttons return true when clicked (most widgets return
-                                      // true when edited/activated)
-            counter++;
+        bool global_toggle_expand = false;
+        if (ImGui::Button("expand all")) {
+            for (auto& peopleCard : detectedPeopleCards) peopleCard.show_card = true;
+        }
         ImGui::SameLine();
-        ImGui::Text("counter = %d", counter);
+        if (ImGui::Button("collapse all")) {
+            for (auto& peopleCard : detectedPeopleCards) peopleCard.show_card = false;
+        }
 
-        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-        ImGui::End();
-    }
+        for (auto& peopleCard : detectedPeopleCards) {
+            ImGui::SetNextItemOpen(peopleCard.show_card);
+            if (ImGui::CollapsingHeader(peopleCard.name.c_str()))
+                peopleCard.show_card = true;
+            else
+                peopleCard.show_card = false;
+        }
 
-    // 3. Show another simple window.
-    if (show_another_window) {
-        ImGui::Begin("Another Window",
-                     &show_another_window);  // Pass a pointer to our bool variable (the window will have
-                                             // a closing button that will clear the bool when clicked)
-        ImGui::Text("Hello from another window!");
-        if (ImGui::Button("Close Me")) show_another_window = false;
+        int i = 0;
+        for (auto& peopleCard : detectedPeopleCards) {
+            if (peopleCard.show_card) {
+                // 3. show card window
+                ImVec2 startPoint{i * 100.0f, h - 400};
+                ImVec2 size{400, 400};
+                // resizable/movable
+                ImGui::SetNextWindowPos(startPoint, ImGuiCond_FirstUseEver);
+                ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
+
+                ImGui::Begin(fmt::format("card {}", peopleCard.name).c_str());
+                ImGui::End();
+                i++;
+            }
+        }
+
         ImGui::End();
     }
 

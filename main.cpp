@@ -40,7 +40,7 @@ int main(int argc, char* argv[]) {
     return a.exec();
      */
 
-    human_card::Window window;
+    human_card::Window window{1280, 720};
     if (!window.init()) {
         return -1;
     };
