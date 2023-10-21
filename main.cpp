@@ -1,7 +1,9 @@
 #include "donde/feature_extract/face_pipeline.h"
 #include "donde/feature_extract/processor_factory.h"
 #include "donde/video_process/ffmpeg_processor.h"
-#include "picture_factory.h"
+#include "play_controller.h"
+#include "play_controller.h"
+#include "picture_generator.h"
 
 #include "window.h"
 
@@ -41,9 +43,15 @@ int main(int argc, char* argv[]) {
      */
 
     human_card::Window window{1280, 720};
-    if (!window.init()) {
+
+    FFmpegVideoProcessor p{};
+    PictureFactory factory{p};
+    PlayController controller{p};
+
+    if (!window.init(&factory, &controller)) {
         return -1;
     };
+
     window.run();
     window.cleanup();
 

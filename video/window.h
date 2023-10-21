@@ -9,23 +9,42 @@
 #include <unordered_map>
 // clang-format: on
 
+#include "play_controller.h"
+#include "picture_generator.h"
 #include "people_card.h"
 
 namespace human_card {
 class Window {
    public:
     Window(int width, int height);
-    bool init();
+    bool init(PictureFactory* factory, PlayController* controller);
     void run();
     void cleanup();
 
    private:
+    bool init_gui();
     void render();
+    bool relayout();
+    void display_cv_image(const cv::Mat& mat);
 
    private:
-    int width_;
-    int height_;
+    int initViewportWidth;
+    int initViewportHeight;
     SDL_Window* window;
+
+    int lastViewportWidth;
+    int lastViewportHeight;
+
+    int currViewportWidth;
+    int currViewportHeight;
+
+    int currMainWindowWidth;
+    int currMainWindowHeight;
+    int currSideWindowWidth;
+    int currSideWindowHeight;
+
+    int frameWidth;
+    int frameHeight;
 
     SDL_GLContext gl_context;
 
@@ -36,5 +55,11 @@ class Window {
 
     std::string videoPath = "";
     std::vector<PeopleCard> detectedPeopleCards;
+
+    PictureFactory* factory = nullptr;
+    PlayController* controller = nullptr;
+
+    GLuint frameTexture;
+    GLenum frameFormat = GL_RGB;
 };
 }  // namespace human_card
