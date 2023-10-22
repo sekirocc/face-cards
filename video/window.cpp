@@ -126,9 +126,6 @@ bool Window::relayout() {
     auto* vp = ImGui::GetMainViewport();
     currViewportWidth = vp->Size[0];
     currViewportHeight = vp->Size[1];
-    if (currViewportWidth == lastViewportWidth && currViewportHeight == lastViewportHeight) {
-        return false;
-    }
 
     currMainWindowWidth = currViewportWidth - 200;
     currMainWindowHeight = currViewportHeight;

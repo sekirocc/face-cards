@@ -53,6 +53,15 @@ message("SDL2 libs: ${SDL2_LIBRARIES}")
 message("SDL2 include dir: ${SDL2_INCLUDE_DIR}")
 
 
+##
+## OpenGL (linux need this)
+##
+find_package(OpenGL REQUIRED)
+message("OPENGL libs: ${OPENGL_LIBRARIES}")
+message("OPENGL include dir: ${OPENGL_INCLUDE_DIR}")
+
+
+
 set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/imgui)
 
 file(GLOB IMGUI_HEADERS ${IMGUI_DIR}/*.h)
@@ -89,7 +98,9 @@ target_include_directories(human_card PRIVATE
         ${CMAKE_SOURCE_DIR}/3rdparty/imgui/backends
         ${CMAKE_SOURCE_DIR}/video
         ${FFMPEG_INCLUDE_DIRS}
+
         ${SDL2_INCLUDE_DIRS}
+        ${OPENGL_INCLUDE_DIRS}
 
 )
 
@@ -100,10 +111,12 @@ target_link_libraries(human_card PRIVATE
 
         ${FFMPEG_LIBRARIES}
         ${SDL2_LIBRARIES}
+        ${OPENGL_LIBRARIES}
         ${OpenCV_LIBS}
 
-	"-framework OpenGL"
+	# "-framework OpenGL" (macOS need this)
     )
+
 
 
 ##
