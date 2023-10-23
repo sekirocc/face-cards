@@ -1,7 +1,5 @@
 // clang-format: off
 #include "imgui.h"
-#include "imgui_impl_opengl3.h"
-#include "imgui_impl_sdl2.h"
 #include <SDL.h>
 #include <stdio.h>
 #include <SDL_opengl.h>
@@ -43,9 +41,6 @@ class Window {
     int currSideWindowWidth;
     int currSideWindowHeight;
 
-    int frameWidth;
-    int frameHeight;
-
     SDL_GLContext gl_context;
 
     // Our state
@@ -59,7 +54,14 @@ class Window {
     PictureFactory* factory = nullptr;
     PlayController* controller = nullptr;
 
+    std::vector<uint8_t> coverFrameData;
+    GLuint coverFrameTexture;
+    int coverFrameWidth;
+    int coverFrameHeight;
+
     GLuint frameTexture;
+    int frameWidth;
+    int frameHeight;
     GLenum frameFormat = GL_RGB;
 };
 }  // namespace human_card

@@ -54,7 +54,6 @@ message("SDL2 include dir: ${SDL2_INCLUDE_DIR}")
 
 
 set(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/imgui)
-
 file(GLOB IMGUI_HEADERS ${IMGUI_DIR}/*.h)
 file(GLOB IMGUI_SOURCES ${IMGUI_DIR}/*.cpp)
 list(APPEND IMGUI_HEADERS
@@ -77,6 +76,7 @@ set(PROJECT_SOURCES
 
         ${IMGUI_HEADERS}
         ${IMGUI_SOURCES}
+
 )
 
 

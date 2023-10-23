@@ -3,7 +3,11 @@
 #include <libyuv/convert_argb.h>
 #include "imgui.h"
 #include "fmt/core.h"
-#include "libyuv.h"
+#include "imgui_impl_opengl3.h"
+#include "imgui_impl_sdl2.h"
+#include "utils.h"
+
+// #include "libyuv.h"
 
 namespace human_card {
 
@@ -19,7 +23,21 @@ Window::Window(int width, int height) : initViewportWidth(width), initViewportHe
 bool Window::init(PictureFactory* factory, PlayController* controller) {
     this->factory = factory;
     this->controller = controller;
-    return this->init_gui();
+
+    auto ret = this->init_gui();
+    if (!ret) {
+        return false;
+    }
+
+    auto loaded = LoadImageFromFile("/Users/bytedance/work/code/qt/human_card/resources/images/video_cover.png",
+                                    coverFrameTexture, coverFrameWidth, coverFrameHeight, coverFrameData);
+
+    if (!loaded) {
+        std::cerr << "Error: cann't load default background image" << std::endl;
+        return false;
+    }
+    std::cout << "loaded default image: " << coverFrameWidth << " x " << coverFrameHeight << std::endl;
+    return true;
 };
 
 bool Window::init_gui() {
@@ -126,9 +144,6 @@ bool Window::relayout() {
     auto* vp = ImGui::GetMainViewport();
     currViewportWidth = vp->Size[0];
     currViewportHeight = vp->Size[1];
-    if (currViewportWidth == lastViewportWidth && currViewportHeight == lastViewportHeight) {
-        return false;
-    }
 
     currMainWindowWidth = currViewportWidth - 200;
     currMainWindowHeight = currViewportHeight;
@@ -164,11 +179,11 @@ void Window::render() {
         auto currSize = ImGui::GetWindowSize();
 
         ImGui::Text("Video Path: %s", videoPath.c_str());
-        ImGui::ProgressBar(sinf((float)ImGui::GetTime()) * 0.5f + 0.5f, ImVec2(currSize.x, 0));
 
         // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame_width, frame_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-        // ImGui::Image();
+        ImGui::Image((void*)(intptr_t)coverFrameTexture, ImVec2(coverFrameWidth, coverFrameHeight));
 
+        ImGui::ProgressBar(sinf((float)ImGui::GetTime()) * 0.5f + 0.5f, ImVec2(currSize.x, 0));
         ImGui::End();
     }
 
