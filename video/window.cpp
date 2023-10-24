@@ -29,14 +29,22 @@ bool Window::init(PictureFactory* factory, PlayController* controller) {
         return false;
     }
 
-    auto loaded = LoadImageFromFile("/Users/bytedance/work/code/qt/human_card/resources/images/video_cover.png",
-                                    coverFrameTexture, coverFrameWidth, coverFrameHeight, coverFrameData);
+    auto loaded = LoadImageFromFile("/Users/bytedance/work/code/cpp/human_card/resources/images/video_cover.png",
+                                    coverFrameTexture,
+                                    coverFrameWidth,
+                                    coverFrameHeight,
+                                    coverFrameData);
 
     if (!loaded) {
         std::cerr << "Error: cann't load default background image" << std::endl;
         return false;
     }
     std::cout << "loaded default image: " << coverFrameWidth << " x " << coverFrameHeight << std::endl;
+
+    auto info = this->controller->Reload("/tmp/Iron_Man-Trailer_HD.mp4");
+    std::cout << "video info: nb_frames: " << info.nb_frames << std::endl;
+    this->controller->Start();
+
     return true;
 };
 
@@ -61,8 +69,12 @@ bool Window::init_gui() {
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
     SDL_WindowFlags window_flags =
         (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-    window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-                              initViewportWidth, initViewportHeight, window_flags);
+    window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example",
+                              SDL_WINDOWPOS_CENTERED,
+                              SDL_WINDOWPOS_CENTERED,
+                              initViewportWidth,
+                              initViewportHeight,
+                              window_flags);
 
     gl_context = SDL_GL_CreateContext(window);
 
@@ -116,11 +128,13 @@ void Window::run() {
             cv::putText(mat, picId, posi, face, scale, color, 2);
 
             // // detect face
-            // std::shared_ptr<donde_toolkits::DetectResult> detect_result = face_pipeline.Detect(mat);
-            // for (auto& face : detect_result->faces) {
+            // std::shared_ptr<donde_toolkits::DetectResult> detect_result =
+            // face_pipeline.Detect(mat); for (auto& face :
+            // detect_result->faces) {
             //     if (face.confidence > 0.8) {
             //         cv::Rect box = face.box;
-            //         cv::rectangle(mat, box.tl(), box.br(), cv::Scalar(0, 255, 0));
+            //         cv::rectangle(mat, box.tl(), box.br(), cv::Scalar(0, 255,
+            //         0));
             //     }
             // }
 
@@ -130,7 +144,7 @@ void Window::run() {
             glBindTexture(GL_TEXTURE_2D, frameTexture);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameWidth, frameHeight, 0, GL_BGR, GL_UNSIGNED_INT, mat.data);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameWidth, frameHeight, 0, GL_BGR, GL_UNSIGNED_BYTE, mat.data);
         }
 
         // render gui
@@ -173,15 +187,28 @@ void Window::render() {
         ImGui::SetNextWindowSize(ImVec2(currMainWindowWidth, currMainWindowHeight));
 
         ImGui::Begin(
-            "ImageGround", NULL,
+            "ImageGround",
+            NULL,
             ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
         auto currSize = ImGui::GetWindowSize();
 
         ImGui::Text("Video Path: %s", videoPath.c_str());
 
-        // glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame_width, frame_height, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
-        ImGui::Image((void*)(intptr_t)coverFrameTexture, ImVec2(coverFrameWidth, coverFrameHeight));
+        float wRatio = static_cast<float>(currMainWindowWidth) / frameWidth;
+        float hRatio = static_cast<float>(currMainWindowHeight) / frameHeight;
+        int displayWidth = currMainWindowWidth;
+        int displayHeight = currMainWindowHeight;
+        if (wRatio < hRatio) {
+            displayWidth = currMainWindowWidth;
+            displayHeight = wRatio * frameHeight;
+        } else {
+            displayHeight = currMainWindowHeight;
+            displayWidth = hRatio * frameWidth;
+        }
+        printf("frame_width: %d, frame_height: %d\n", frameWidth, frameHeight);
+        printf("display_width: %d, display_height: %d\n", displayWidth, displayHeight);
+        ImGui::Image((void*)(intptr_t)frameTexture, ImVec2(displayWidth, displayHeight));
 
         ImGui::ProgressBar(sinf((float)ImGui::GetTime()) * 0.5f + 0.5f, ImVec2(currSize.x, 0));
         ImGui::End();
@@ -193,7 +220,8 @@ void Window::render() {
         ImGui::SetNextWindowSize(ImVec2(currSideWindowWidth, currSideWindowHeight));
 
         ImGui::Begin(
-            "Detections", NULL,
+            "Detections",
+            NULL,
             ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
         bool global_toggle_expand = false;
@@ -236,7 +264,9 @@ void Window::render() {
     ImGui::Render();
 
     glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
-    glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w,
+    glClearColor(clear_color.x * clear_color.w,
+                 clear_color.y * clear_color.w,
+                 clear_color.z * clear_color.w,
                  clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

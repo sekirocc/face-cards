@@ -1,5 +1,10 @@
 BasedOnStyle: Google
+BinPackParameters: false
+BinPackArguments: false
+ExperimentalAutoDetectBinPacking: true
 AlignAfterOpenBracket: Align
+AllowAllParametersOfDeclarationOnNextLine: false
+AllowAllArgumentsOnNextLine: false
 Language: Cpp
 ColumnLimit: 120
 IndentWidth: 4
