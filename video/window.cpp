@@ -11,13 +11,13 @@
 
 namespace human_card {
 
-Window::Window(int width, int height) : initViewportWidth(width), initViewportHeight(height) {
-    lastViewportWidth = initViewportWidth;
-    lastViewportHeight = initViewportHeight;
+Window::Window(int width, int height) : init_viewport_width(width), init_viewport_height(height) {
+    last_viewport_width = init_viewport_width;
+    last_viewport_height = init_viewport_height;
 
-    detectedPeopleCards.push_back(PeopleCard{.name = "Alice", .show_card = false});
-    detectedPeopleCards.push_back(PeopleCard{.name = "Bob", .show_card = false});
-    detectedPeopleCards.push_back(PeopleCard{.name = "Candy", .show_card = false});
+    detected_people_cards.push_back(PeopleCard{.name = "Alice", .show_card = false});
+    detected_people_cards.push_back(PeopleCard{.name = "Bob", .show_card = false});
+    detected_people_cards.push_back(PeopleCard{.name = "Candy", .show_card = false});
 };
 
 bool Window::init(PictureFactory* factory, PlayController* controller) {
@@ -29,17 +29,17 @@ bool Window::init(PictureFactory* factory, PlayController* controller) {
         return false;
     }
 
-    auto loaded = LoadImageFromFile("/Users/bytedance/work/code/cpp/human_card/resources/images/video_cover.png",
-                                    coverFrameTexture,
-                                    coverFrameWidth,
-                                    coverFrameHeight,
-                                    coverFrameData);
+    auto loaded = LoadImageFromFile("/Users/bytedance/work/code/qt/human_card/resources/images/video_cover.png",
+                                    cover_frame_texture,
+                                    cover_frame_width,
+                                    cover_frame_height,
+                                    cover_frame_data);
 
     if (!loaded) {
         std::cerr << "Error: cann't load default background image" << std::endl;
         return false;
     }
-    std::cout << "loaded default image: " << coverFrameWidth << " x " << coverFrameHeight << std::endl;
+    std::cout << "loaded default image: " << cover_frame_width << " x " << cover_frame_height << std::endl;
 
     auto info = this->controller->Reload("/tmp/Iron_Man-Trailer_HD.mp4");
     std::cout << "video info: nb_frames: " << info.nb_frames << std::endl;
@@ -72,8 +72,8 @@ bool Window::init_gui() {
     window = SDL_CreateWindow("Dear ImGui SDL2+OpenGL3 example",
                               SDL_WINDOWPOS_CENTERED,
                               SDL_WINDOWPOS_CENTERED,
-                              initViewportWidth,
-                              initViewportHeight,
+                              init_viewport_width,
+                              init_viewport_height,
                               window_flags);
 
     gl_context = SDL_GL_CreateContext(window);
@@ -96,7 +96,7 @@ bool Window::init_gui() {
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    glGenTextures(1, &frameTexture);
+    glGenTextures(1, &frame_texture);
 
     return true;
 };
@@ -115,9 +115,9 @@ void Window::run() {
 
         VideoPicture* pic = factory->try_next();
         if (pic != nullptr) {
-            frameWidth = pic->Width();
-            frameHeight = pic->Height();
-            cv::Mat mat(frameWidth, frameHeight, CV_8UC3, pic->frame->data[0], pic->frame->linesize[0]);
+            frame_width = pic->Width();
+            frame_height = pic->Height();
+            cv::Mat mat(frame_width, frame_height, CV_8UC3, pic->frame->data[0], pic->frame->linesize[0]);
 
             // draw frame id
             std::string picId = fmt::format("{}", pic->id_);
@@ -141,10 +141,10 @@ void Window::run() {
             // int progress = pic->id_ * 100 / video_total_frames;
             // pgb_video_process->setValue(progress);
 
-            glBindTexture(GL_TEXTURE_2D, frameTexture);
+            glBindTexture(GL_TEXTURE_2D, frame_texture);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frameWidth, frameHeight, 0, GL_BGR, GL_UNSIGNED_BYTE, mat.data);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame_width, frame_height, 0, GL_BGR, GL_UNSIGNED_BYTE, mat.data);
         }
 
         // render gui
@@ -156,17 +156,17 @@ void Window::display_cv_image(const cv::Mat& mat) {}
 
 bool Window::relayout() {
     auto* vp = ImGui::GetMainViewport();
-    currViewportWidth = vp->Size[0];
-    currViewportHeight = vp->Size[1];
+    curr_viewport_width = vp->Size[0];
+    curr_viewport_height = vp->Size[1];
 
-    currMainWindowWidth = currViewportWidth - 200;
-    currMainWindowHeight = currViewportHeight;
+    curr_main_window_width = curr_viewport_width - 200;
+    curr_main_window_height = curr_viewport_height;
 
-    currSideWindowWidth = 200;
-    currSideWindowHeight = currViewportHeight;
+    curr_side_window_width = 200;
+    curr_side_window_height = curr_viewport_height;
 
-    lastViewportWidth = currViewportWidth;
-    lastViewportHeight = currViewportHeight;
+    last_viewport_width = curr_viewport_width;
+    last_viewport_height = curr_viewport_height;
 
     return true;
 };
@@ -184,40 +184,38 @@ void Window::render() {
     // 1. show ImageGround window.
     {
         ImGui::SetNextWindowPos(ImVec2(0, 0));
-        ImGui::SetNextWindowSize(ImVec2(currMainWindowWidth, currMainWindowHeight));
+        ImGui::SetNextWindowSize(ImVec2(curr_main_window_width, curr_main_window_height));
 
         ImGui::Begin(
             "ImageGround",
             NULL,
             ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
-        auto currSize = ImGui::GetWindowSize();
+        auto window_size = ImGui::GetWindowSize();
 
-        ImGui::Text("Video Path: %s", videoPath.c_str());
+        ImGui::Text("Video Path: %s", video_path.c_str());
 
-        float wRatio = static_cast<float>(currMainWindowWidth) / frameWidth;
-        float hRatio = static_cast<float>(currMainWindowHeight) / frameHeight;
-        int displayWidth = currMainWindowWidth;
-        int displayHeight = currMainWindowHeight;
-        if (wRatio < hRatio) {
-            displayWidth = currMainWindowWidth;
-            displayHeight = wRatio * frameHeight;
+        float ration_w = static_cast<float>(curr_main_window_width) / frame_width;
+        float ration_h = static_cast<float>(curr_main_window_height) / frame_height;
+        int display_width = curr_main_window_width;
+        int display_height = curr_main_window_height;
+        if (ration_w < ration_h) {
+            display_width = curr_main_window_width;
+            display_height = ration_w * frame_height;
         } else {
-            displayHeight = currMainWindowHeight;
-            displayWidth = hRatio * frameWidth;
+            display_height = curr_main_window_height;
+            display_width = ration_h * frame_width;
         }
-        printf("frame_width: %d, frame_height: %d\n", frameWidth, frameHeight);
-        printf("display_width: %d, display_height: %d\n", displayWidth, displayHeight);
-        ImGui::Image((void*)(intptr_t)frameTexture, ImVec2(displayWidth, displayHeight));
+        ImGui::Image((void*)(intptr_t)frame_texture, ImVec2(display_width, display_height));
 
-        ImGui::ProgressBar(sinf((float)ImGui::GetTime()) * 0.5f + 0.5f, ImVec2(currSize.x, 0));
+        ImGui::ProgressBar(sinf((float)ImGui::GetTime()) * 0.5f + 0.5f, ImVec2(window_size.x, 0));
         ImGui::End();
     }
 
     // 2. show Toolbar window
     {
-        ImGui::SetNextWindowPos(ImVec2(currMainWindowWidth, 0));
-        ImGui::SetNextWindowSize(ImVec2(currSideWindowWidth, currSideWindowHeight));
+        ImGui::SetNextWindowPos(ImVec2(curr_main_window_width, 0));
+        ImGui::SetNextWindowSize(ImVec2(curr_side_window_width, curr_side_window_height));
 
         ImGui::Begin(
             "Detections",
@@ -226,32 +224,32 @@ void Window::render() {
 
         bool global_toggle_expand = false;
         if (ImGui::Button("expand all")) {
-            for (auto& peopleCard : detectedPeopleCards) peopleCard.show_card = true;
+            for (auto& people_card : detected_people_cards) people_card.show_card = true;
         }
         ImGui::SameLine();
         if (ImGui::Button("collapse all")) {
-            for (auto& peopleCard : detectedPeopleCards) peopleCard.show_card = false;
+            for (auto& people_card : detected_people_cards) people_card.show_card = false;
         }
 
-        for (auto& peopleCard : detectedPeopleCards) {
-            ImGui::SetNextItemOpen(peopleCard.show_card);
-            if (ImGui::CollapsingHeader(peopleCard.name.c_str()))
-                peopleCard.show_card = true;
+        for (auto& people_card : detected_people_cards) {
+            ImGui::SetNextItemOpen(people_card.show_card);
+            if (ImGui::CollapsingHeader(people_card.name.c_str()))
+                people_card.show_card = true;
             else
-                peopleCard.show_card = false;
+                people_card.show_card = false;
         }
 
         int i = 0;
-        for (auto& peopleCard : detectedPeopleCards) {
-            if (peopleCard.show_card) {
+        for (auto& people_card : detected_people_cards) {
+            if (people_card.show_card) {
                 // 3. show card window
-                ImVec2 startPoint{i * 100.0f, static_cast<float>((currViewportHeight - 400))};
+                ImVec2 point{i * 100.0f, static_cast<float>((curr_viewport_height - 400))};
                 ImVec2 size{400, 400};
                 // resizable/movable
-                ImGui::SetNextWindowPos(startPoint, ImGuiCond_FirstUseEver);
+                ImGui::SetNextWindowPos(point, ImGuiCond_FirstUseEver);
                 ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
 
-                ImGui::Begin(fmt::format("card {}", peopleCard.name).c_str());
+                ImGui::Begin(fmt::format("card {}", people_card.name).c_str());
                 ImGui::End();
                 i++;
             }
