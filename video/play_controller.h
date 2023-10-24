@@ -22,7 +22,7 @@ struct MediaPlayState {
     size_t window_width;
     size_t window_height;
 
-    size_t progress;
+    float progress;
     int volume;
 
     std::string media_filepath;
@@ -47,6 +47,10 @@ class PlayController {
     bool Backward(int step);
     bool Seek(int position);
 
+   private:
     MediaPlayState state;
     FFmpegVideoProcessor& video_processor;
+
+    VideoStreamInfo info;
+    long curr_frame_id = 0;
 };

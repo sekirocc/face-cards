@@ -29,7 +29,7 @@ bool Window::init(PictureFactory* factory, PlayController* controller) {
         return false;
     }
 
-    auto loaded = LoadImageFromFile("/Users/bytedance/work/code/qt/human_card/resources/images/video_cover.png",
+    auto loaded = LoadImageFromFile("/Users/bytedance/work/code/cpp/human_card/resources/images/video_cover.png",
                                     cover_frame_texture,
                                     cover_frame_width,
                                     cover_frame_height,
@@ -120,12 +120,12 @@ void Window::run() {
             cv::Mat mat(frame_width, frame_height, CV_8UC3, pic->frame->data[0], pic->frame->linesize[0]);
 
             // draw frame id
-            std::string picId = fmt::format("{}", pic->id_);
+            std::string pic_id = fmt::format("{}", pic->id_);
             cv::Point posi{100, 100};
             int face = cv::FONT_HERSHEY_PLAIN;
             double scale = 2;
             cv::Scalar color{255, 0, 0};  // blue, BGR
-            cv::putText(mat, picId, posi, face, scale, color, 2);
+            cv::putText(mat, pic_id, posi, face, scale, color, 2);
 
             // // detect face
             // std::shared_ptr<donde_toolkits::DetectResult> detect_result =
@@ -208,7 +208,8 @@ void Window::render() {
         }
         ImGui::Image((void*)(intptr_t)frame_texture, ImVec2(display_width, display_height));
 
-        ImGui::ProgressBar(sinf((float)ImGui::GetTime()) * 0.5f + 0.5f, ImVec2(window_size.x, 0));
+        const auto& play_state = controller->CurrentState();
+        ImGui::ProgressBar(play_state.progress, ImVec2(window_size.x, 0));
         ImGui::End();
     }
 
