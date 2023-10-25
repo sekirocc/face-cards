@@ -1,6 +1,10 @@
 #include "window.h"
+#include <SDL_events.h>
+#include <SDL_keycode.h>
 #include <SDL_opengl.h>
 #include <libyuv/convert_argb.h>
+#include <chrono>
+#include <thread>
 #include "imgui.h"
 #include "fmt/core.h"
 #include "imgui_impl_opengl3.h"
@@ -111,9 +115,10 @@ void Window::run() {
             if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE &&
                 event.window.windowID == SDL_GetWindowID(window))
                 done = true;
+            if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE) controller->TogglePlay();
         }
 
-        VideoPicture* pic = factory->try_next();
+        VideoPicture* pic = factory->next();
         if (pic != nullptr) {
             frame_width = pic->Width();
             frame_height = pic->Height();

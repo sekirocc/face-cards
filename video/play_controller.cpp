@@ -13,7 +13,7 @@ VideoStreamInfo PlayController::Reload(const std::string& filename) {
     return info;
 }
 
-bool PlayController::Start() {
+void PlayController::Start() {
     video_processor.Process({
         .warm_up_frames = 0,
         .skip_frames = 1,
@@ -25,34 +25,33 @@ bool PlayController::Start() {
         state.progress = static_cast<float>(curr_frame_id) / info.nb_frames;
         return true;
     });
-
     state.playing_status = PlayingStatus::PLAYING;
-    return true;
 }
 
-bool PlayController::Pause() {
+void PlayController::Pause() {
     video_processor.Pause();
-
     state.playing_status = PlayingStatus::PAUSED;
-    return true;
 }
 
-bool PlayController::Resume() {
+void PlayController::Resume() {
     video_processor.Resume();
-
     state.playing_status = PlayingStatus::PLAYING;
-    return true;
 }
 
-bool PlayController::Stop() {
+void PlayController::TogglePlay() {
+    if (state.playing_status == PlayingStatus::PLAYING)
+        Pause();
+    else
+        Resume();
+}
+
+void PlayController::Stop() {
     video_processor.Stop();
-
     state.playing_status = PlayingStatus::STOPPED;
-    return true;
 }
 
-bool PlayController::Forward(int step) { return true; }
+void PlayController::Forward(int step) {}
 
-bool PlayController::Backward(int step) { return true; }
+void PlayController::Backward(int step) {}
 
-bool PlayController::Seek(int position) { return true; }
+void PlayController::Seek(int position) {}

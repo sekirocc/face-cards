@@ -38,14 +38,15 @@ class PlayController {
 
     VideoStreamInfo Reload(const std::string& filename);
 
-    bool Start();
-    bool Pause();
-    bool Resume();
-    bool Stop();
+    void Start();
+    void Pause();
+    void Resume();
+    void TogglePlay();
+    void Stop();
 
-    bool Forward(int step);
-    bool Backward(int step);
-    bool Seek(int position);
+    void Forward(int step);
+    void Backward(int step);
+    void Seek(int position);
 
    private:
     MediaPlayState state;

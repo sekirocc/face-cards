@@ -84,7 +84,6 @@ add_executable(human_card ${PROJECT_SOURCES})
 
 
 target_include_directories(human_card PRIVATE
-        ${CMAKE_SOURCE_DIR}/3rdparty/cppchannel
         ${CMAKE_SOURCE_DIR}/3rdparty/imgui
         ${CMAKE_SOURCE_DIR}/3rdparty/imgui/backends
         ${CMAKE_SOURCE_DIR}/video
@@ -105,6 +104,11 @@ target_link_libraries(human_card PRIVATE
 	"-framework OpenGL"
     )
 
+add_subdirectory(3rdparty/cpp-channel)
+
+target_include_directories(human_card PRIVATE
+        ${CMAKE_SOURCE_DIR}/3rdparty/cpp-channel/include
+)
 
 ##
 ## Conan

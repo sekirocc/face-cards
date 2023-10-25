@@ -1,7 +1,7 @@
 #pragma once
 
-#include "channel.h"
 #include "picture.h"
+#include "msd/channel.hpp"
 
 #include <atomic>
 #include <chrono>
@@ -23,7 +23,7 @@ using donde_toolkits::video_process::FFmpegVideoProcessor;
 class PictureFactory {
    public:
     PictureFactory(FFmpegVideoProcessor& video_processor, size_t pictures_len = 20)
-        : video_processor_{video_processor}, pictures_len(pictures_len), output_ch{pictures_len} {
+        : video_processor_{video_processor}, pictures_len(pictures_len) {
         pictures = new VideoPicture[pictures_len];
 
         FFmpegVideoFrameProcessor p(std::bind(&PictureFactory::consume, this, std::placeholders::_1));
@@ -67,17 +67,14 @@ class PictureFactory {
         //           << std::endl;
 
         output_ch << &pic;
-
         return true;
     }
 
-    VideoPicture* try_next() {
+    VideoPicture* next() {
+        if (output_ch.empty()) return nullptr;
         VideoPicture* ptr;
-        auto s = output_ch.try_output(ptr);
-        if (s == CHANNEL_OK) {
-            return ptr;
-        }
-        return nullptr;
+        output_ch >> ptr;
+        return ptr;
     }
 
    private:
@@ -88,7 +85,7 @@ class PictureFactory {
     VideoPicture* pictures;
     int pictures_len;
 
-    Channel<VideoPicture*> output_ch;
+    msd::channel<VideoPicture*> output_ch{1};
 
     int write_index = 0;
     int read_index = 0;
