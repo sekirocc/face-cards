@@ -1,6 +1,7 @@
 // clang-format: off
 #include "imgui.h"
 #include <SDL.h>
+#include <donde/feature_extract/face_pipeline.h>
 #include <stdio.h>
 #include <SDL_opengl.h>
 #include <string>
@@ -11,11 +12,13 @@
 #include "picture_generator.h"
 #include "people_card.h"
 
+using donde_toolkits::feature_extract::IFacePipeline;
+
 namespace human_card {
 class Window {
    public:
     Window(int width, int height);
-    bool init(PictureFactory* factory, PlayController* controller);
+    bool init(PictureGenerator* factory, PlayController* controller, IFacePipeline* face_pipeline);
     void run();
     void cleanup();
 
@@ -23,7 +26,8 @@ class Window {
     bool init_gui();
     void render();
     bool relayout();
-    void display_cv_image(const cv::Mat& mat);
+
+    void prepare_frame_texture(VideoPicture* pic);
 
    private:
     int init_viewport_width;
@@ -51,8 +55,9 @@ class Window {
     std::string video_path = "";
     std::vector<PeopleCard> detected_people_cards;
 
-    PictureFactory* factory = nullptr;
+    PictureGenerator* pic_gen = nullptr;
     PlayController* controller = nullptr;
+    IFacePipeline* face_pipeline = nullptr;
 
     std::vector<uint8_t> cover_frame_data;
     GLuint cover_frame_texture;

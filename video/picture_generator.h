@@ -20,13 +20,13 @@ extern "C" {
 using donde_toolkits::video_process::FFmpegVideoFrameProcessor;
 using donde_toolkits::video_process::FFmpegVideoProcessor;
 
-class PictureFactory {
+class PictureGenerator {
    public:
-    PictureFactory(FFmpegVideoProcessor& video_processor, size_t pictures_len = 20)
+    PictureGenerator(FFmpegVideoProcessor& video_processor, size_t pictures_len = 20)
         : video_processor_{video_processor}, pictures_len(pictures_len) {
         pictures = new VideoPicture[pictures_len];
 
-        FFmpegVideoFrameProcessor p(std::bind(&PictureFactory::consume, this, std::placeholders::_1));
+        FFmpegVideoFrameProcessor p(std::bind(&PictureGenerator::consume, this, std::placeholders::_1));
 
         video_processor.Register(p);
 
@@ -35,7 +35,7 @@ class PictureFactory {
         record_time = std::chrono::steady_clock::now();
     };
 
-    ~PictureFactory() { delete[] pictures; }
+    ~PictureGenerator() { delete[] pictures; }
 
     bool consume(const donde_toolkits::video_process::FFmpegVideoFrame* vf) {
         const AVFrame* f = (const AVFrame*)vf->getFrame();

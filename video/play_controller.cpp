@@ -45,6 +45,8 @@ void PlayController::TogglePlay() {
         Resume();
 }
 
+bool PlayController::IsPlaying() { return state.playing_status == PlayingStatus::PLAYING; }
+
 void PlayController::Stop() {
     video_processor.Stop();
     state.playing_status = PlayingStatus::STOPPED;

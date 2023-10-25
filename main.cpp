@@ -9,6 +9,7 @@
 
 using json = nlohmann::json;
 using donde_toolkits::feature_extract::FacePipeline;
+using donde_toolkits::feature_extract::ProcessorFactory;
 using donde_toolkits::video_process::FFmpegVideoFrameProcessor;
 using donde_toolkits::video_process::FFmpegVideoProcessor;
 
@@ -44,11 +45,27 @@ int main(int argc, char* argv[]) {
 
     human_card::Window window{1280, 720};
 
+    json conf = R"(
+    {
+        "detector": {
+          "concurrent": 1,
+          "device_id": "CPU",
+          "model": "./contrib/models/face-detection-adas-0001.xml",
+          "warmup": false
+        }
+    }
+)"_json;
+
+    // init face pipeline, with detector only.
+    FacePipeline pipeline{conf};
+    auto det = ProcessorFactory::createDetector();
+    pipeline.Init(det, nullptr, nullptr, nullptr);
+
     FFmpegVideoProcessor p{};
-    PictureFactory factory{p};
+    PictureGenerator factory{p};
     PlayController controller{p};
 
-    if (!window.init(&factory, &controller)) {
+    if (!window.init(&factory, &controller, &pipeline)) {
         return -1;
     };
 

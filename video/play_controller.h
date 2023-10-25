@@ -42,6 +42,7 @@ class PlayController {
     void Pause();
     void Resume();
     void TogglePlay();
+    bool IsPlaying();
     void Stop();
 
     void Forward(int step);

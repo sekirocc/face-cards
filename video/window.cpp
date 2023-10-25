@@ -24,9 +24,10 @@ Window::Window(int width, int height) : init_viewport_width(width), init_viewpor
     detected_people_cards.push_back(PeopleCard{.name = "Candy", .show_card = false});
 };
 
-bool Window::init(PictureFactory* factory, PlayController* controller) {
-    this->factory = factory;
+bool Window::init(PictureGenerator* factory, PlayController* controller, IFacePipeline* face_pipeline) {
+    this->pic_gen = factory;
     this->controller = controller;
+    this->face_pipeline = face_pipeline;
 
     auto ret = this->init_gui();
     if (!ret) {
@@ -45,7 +46,8 @@ bool Window::init(PictureFactory* factory, PlayController* controller) {
     }
     std::cout << "loaded default image: " << cover_frame_width << " x " << cover_frame_height << std::endl;
 
-    auto info = this->controller->Reload("/tmp/Iron_Man-Trailer_HD.mp4");
+    video_path = "/tmp/Iron_Man-Trailer_HD.mp4";
+    auto info = this->controller->Reload(video_path);
     std::cout << "video info: nb_frames: " << info.nb_frames << std::endl;
     this->controller->Start();
 
@@ -118,38 +120,11 @@ void Window::run() {
             if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_SPACE) controller->TogglePlay();
         }
 
-        VideoPicture* pic = factory->next();
-        if (pic != nullptr) {
-            frame_width = pic->Width();
-            frame_height = pic->Height();
-            cv::Mat mat(frame_width, frame_height, CV_8UC3, pic->frame->data[0], pic->frame->linesize[0]);
-
-            // draw frame id
-            std::string pic_id = fmt::format("{}", pic->id_);
-            cv::Point posi{100, 100};
-            int face = cv::FONT_HERSHEY_PLAIN;
-            double scale = 2;
-            cv::Scalar color{255, 0, 0};  // blue, BGR
-            cv::putText(mat, pic_id, posi, face, scale, color, 2);
-
-            // // detect face
-            // std::shared_ptr<donde_toolkits::DetectResult> detect_result =
-            // face_pipeline.Detect(mat); for (auto& face :
-            // detect_result->faces) {
-            //     if (face.confidence > 0.8) {
-            //         cv::Rect box = face.box;
-            //         cv::rectangle(mat, box.tl(), box.br(), cv::Scalar(0, 255,
-            //         0));
-            //     }
-            // }
-
-            // int progress = pic->id_ * 100 / video_total_frames;
-            // pgb_video_process->setValue(progress);
-
-            glBindTexture(GL_TEXTURE_2D, frame_texture);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame_width, frame_height, 0, GL_BGR, GL_UNSIGNED_BYTE, mat.data);
+        if (controller->IsPlaying()) {
+            VideoPicture* pic = pic_gen->next();
+            if (pic != nullptr) {
+                prepare_frame_texture(pic);
+            }
         }
 
         // render gui
@@ -157,7 +132,44 @@ void Window::run() {
     }
 };
 
-void Window::display_cv_image(const cv::Mat& mat) {}
+void Window::prepare_frame_texture(VideoPicture* pic) {
+    frame_width = pic->Width();
+    frame_height = pic->Height();
+    cv::Mat mat(frame_width, frame_height, CV_8UC3, pic->frame->data[0], pic->frame->linesize[0]);
+
+    // draw frame id
+    std::string pic_id = fmt::format("{}", pic->id_);
+    cv::Point posi{100, 100};
+    int face = cv::FONT_HERSHEY_PLAIN;
+    double scale = 2;
+    cv::Scalar color{255, 0, 0};  // blue, BGR
+    cv::putText(mat, pic_id, posi, face, scale, color, 2);
+
+    auto t1 = std::chrono::steady_clock::now();
+    // detect face
+    std::shared_ptr<donde_toolkits::DetectResult> detect_result = face_pipeline->Detect(mat);
+    for (auto& face : detect_result->faces) {
+        if (face.confidence > 0.8) {
+            cv::Rect box = face.box;
+            cv::rectangle(mat, box.tl(), box.br(), cv::Scalar(0, 255, 0));
+        }
+    }
+    auto [t2, used_ms] = time_since(t1);
+    printf("face pipeline detect use time: %d ms, pic_id: %d, detected faces: %d\n",
+           used_ms.count(),
+           pic->id_,
+           detect_result->faces.size());
+    if (pic->id_ == 898) {
+        controller->Pause();
+    }
+
+    glBindTexture(GL_TEXTURE_2D, frame_texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, frame_width, frame_height, 0, GL_BGR, GL_UNSIGNED_BYTE, mat.data);
+
+    auto [t3, used_ms2] = time_since(t2);
+}
 
 bool Window::relayout() {
     auto* vp = ImGui::GetMainViewport();
