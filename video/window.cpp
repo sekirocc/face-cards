@@ -34,7 +34,7 @@ bool Window::init(PictureGenerator* factory, PlayController* controller, IFacePi
         return false;
     }
 
-    auto loaded = LoadImageFromFile("/Users/bytedance/work/code/cpp/human_card/resources/images/video_cover.png",
+    auto loaded = LoadImageFromFile("./resources/images/video_cover.png",
                                     cover_frame_texture,
                                     cover_frame_width,
                                     cover_frame_height,
@@ -123,7 +123,7 @@ void Window::run() {
         if (controller->IsPlaying()) {
             VideoPicture* pic = pic_gen->next();
             if (pic != nullptr) {
-                prepare_frame_texture(pic);
+                if (pic->id_ % 5 == 0) prepare_frame_texture(pic);
             }
         }
 
