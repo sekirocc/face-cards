@@ -1,4 +1,5 @@
 #include "play_controller.h"
+#include "fmt/format.h"
 
 #include <donde/video_process/ffmpeg_processor.h>
 
@@ -10,6 +11,12 @@ PlayController::PlayController(FFmpegVideoProcessor& processor) : video_processo
 
 VideoStreamInfo PlayController::Reload(const std::string& filename) {
     info = video_processor.OpenVideoContext(filename);
+    std::cout << fmt::format(
+        "open video info: nb_frames {}, avg_frame_rate: {}, duration_seconds: {}, total_frames: {}",
+        info.nb_frames,
+        info.avg_frame_rate,
+        info.duration_seconds,
+        info.avg_frame_rate * info.duration_seconds);
     return info;
 }
 
@@ -22,7 +29,7 @@ void PlayController::Start() {
     });
     video_processor.Register([&](const FFmpegVideoFrame* frame) -> bool {
         curr_frame_id = frame->getFrameId();
-        state.progress = static_cast<float>(curr_frame_id) / info.nb_frames;
+        state.progress = static_cast<float>(curr_frame_id) / (info.duration_seconds * info.avg_frame_rate);
         return true;
     });
     state.playing_status = PlayingStatus::PLAYING;

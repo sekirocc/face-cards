@@ -4,6 +4,7 @@
 #include <SDL_opengl.h>
 #include <libyuv/convert_argb.h>
 #include <chrono>
+#include <opencv2/imgcodecs.hpp>
 #include <thread>
 #include "imgui.h"
 #include "fmt/core.h"
@@ -46,7 +47,7 @@ bool Window::init(PictureGenerator* factory, PlayController* controller, IFacePi
     }
     std::cout << "loaded default image: " << cover_frame_width << " x " << cover_frame_height << std::endl;
 
-    video_path = "/tmp/Iron_Man-Trailer_HD.mp4";
+    video_path = "./contrib/Iron_Man-Trailer_HD.mp4";
     auto info = this->controller->Reload(video_path);
     std::cout << "video info: nb_frames: " << info.nb_frames << std::endl;
     this->controller->Start();
@@ -135,7 +136,7 @@ void Window::run() {
 void Window::prepare_frame_texture(VideoPicture* pic) {
     frame_width = pic->Width();
     frame_height = pic->Height();
-    cv::Mat mat(frame_width, frame_height, CV_8UC3, pic->frame->data[0], pic->frame->linesize[0]);
+    cv::Mat mat(frame_height, frame_width, CV_8UC3, pic->frame->data[0], pic->frame->linesize[0]);
 
     // draw frame id
     std::string pic_id = fmt::format("{}", pic->id_);
@@ -149,19 +150,21 @@ void Window::prepare_frame_texture(VideoPicture* pic) {
     // detect face
     std::shared_ptr<donde_toolkits::DetectResult> detect_result = face_pipeline->Detect(mat);
     for (auto& face : detect_result->faces) {
-        if (face.confidence > 0.8) {
+        if (face.confidence > 0.4) {
             cv::Rect box = face.box;
             cv::rectangle(mat, box.tl(), box.br(), cv::Scalar(0, 255, 0));
         }
     }
     auto [t2, used_ms] = time_since(t1);
-    printf("face pipeline detect use time: %d ms, pic_id: %d, detected faces: %d\n",
+    printf("face pipeline detect use time: %lld ms, pic_id: %ld, detected faces: %ld\n",
            used_ms.count(),
            pic->id_,
            detect_result->faces.size());
-    if (pic->id_ == 898) {
-        controller->Pause();
-    }
+
+    // if (pic->id_ == 910) {
+    //     cv::imwrite("./contrib/901.jpg", mat);
+    //     controller->Pause();
+    // }
 
     glBindTexture(GL_TEXTURE_2D, frame_texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
