@@ -124,7 +124,7 @@ void Window::run() {
         if (controller->IsPlaying()) {
             VideoPicture* pic = pic_gen->next();
             if (pic != nullptr) {
-                if (pic->id_ % 5 == 0) prepare_frame_texture(pic);
+                prepare_frame_texture(pic);
             }
         }
 
@@ -150,8 +150,16 @@ void Window::prepare_frame_texture(VideoPicture* pic) {
     // detect face
     std::shared_ptr<donde_toolkits::DetectResult> detect_result = face_pipeline->Detect(mat);
     for (auto& face : detect_result->faces) {
-        if (face.confidence > 0.4) {
+        if (face.confidence > 0.8) {
             cv::Rect box = face.box;
+            // FIXME: save to first detected cards?
+            auto copy = mat.clone();
+            detected_people_cards.at(0).images.push_back(CardImage{
+                .big_frame = copy,
+                .small_face = copy(box),
+                .face_rect = box,
+            });
+            // draw on orignal mat
             cv::rectangle(mat, box.tl(), box.br(), cv::Scalar(0, 255, 0));
         }
     }
@@ -271,6 +279,33 @@ void Window::render() {
                 ImGui::SetNextWindowSize(size, ImGuiCond_FirstUseEver);
 
                 ImGui::Begin(fmt::format("card {}", people_card.name).c_str());
+                // draw grid of image
+
+                if (ImGui::BeginTable("table_share_lineheight", 2, ImGuiTableFlags_Borders)) {
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::ColorButton("##1",
+                                       ImVec4(0.13f, 0.26f, 0.40f, 1.0f),
+                                       ImGuiColorEditFlags_None,
+                                       ImVec2(40, 40));
+                    ImGui::TableNextColumn();
+                    ImGui::Text("Line 1");
+                    ImGui::Text("Line 2");
+
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    ImGui::ColorButton("##2",
+                                       ImVec4(0.13f, 0.26f, 0.40f, 1.0f),
+                                       ImGuiColorEditFlags_None,
+                                       ImVec2(40, 40));
+                    ImGui::TableNextColumn();
+                    ImGui::SameLine(0.0f, 0.0f);  // Reuse line height from previous column
+                    ImGui::Text("Line 1, with SameLine(0,0)");
+                    ImGui::Text("Line 2");
+
+                    ImGui::EndTable();
+                }
+
                 ImGui::End();
                 i++;
             }

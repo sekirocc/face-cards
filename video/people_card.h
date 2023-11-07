@@ -5,7 +5,9 @@
 
 namespace human_card {
 struct CardImage {
-    cv::Mat frame;
+    cv::Mat big_frame;
+    cv::Mat small_face;
+    cv::Rect face_rect;
 };
 
 struct PeopleCard {
