@@ -2,7 +2,8 @@
 #include "donde/feature_extract/processor_factory.h"
 #include "donde/video_process/ffmpeg_processor.h"
 #include "mainwindow.h"
-#include "picture_factory.h"
+#include "picture_generator.h"
+#include "play_controller.h"
 
 #include <QApplication>
 
@@ -31,8 +32,8 @@ int main(int argc, char* argv[]) {
     pipeline.Init(detector, nullptr, nullptr, nullptr);
 
     FFmpegVideoProcessor p{};
-    PictureFactory factory{p};
-    MediaController controller{p};
+    PictureGenerator factory{p};
+    PlayController controller{p};
 
     MainWindow w{factory, controller, pipeline};
     w.show();

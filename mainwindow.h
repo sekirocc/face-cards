@@ -1,10 +1,9 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "media_controller.h"
-#include "picture_factory.h"
-
-
+#include "people_card.h"
+#include "picture_generator.h"
+#include "play_controller.h"
 
 #include <QMainWindow>
 #include <QtMultimediaWidgets/QVideoWidget>
@@ -26,7 +25,9 @@ class MainWindow : public QMainWindow {
     Q_OBJECT
 
   public:
-    MainWindow(PictureFactory& picture_factory, MediaController& media_controller, FacePipeline& pipeline,
+    MainWindow(PictureGenerator& picture_factory,
+               PlayController& media_controller,
+               FacePipeline& pipeline,
                QWidget* parent = nullptr);
 
     ~MainWindow();
@@ -34,7 +35,6 @@ class MainWindow : public QMainWindow {
     void SetVideoOpenSuccess(bool);
     void SetVideoDurationSeconds(int64_t);
     void SetVideoTotalFrames(int64_t);
-
 
   private:
     void show_video_cover();
@@ -55,6 +55,7 @@ class MainWindow : public QMainWindow {
     QVideoSink* video_display_sink;
 
     QLineEdit* txt_video_filepath;
+    std::vector<human_card::PeopleCard> detected_people_cards;
 
     QPushButton* btn_stop;
     QPushButton* btn_start;
@@ -63,8 +64,8 @@ class MainWindow : public QMainWindow {
 
     std::thread picture_thread;
 
-    PictureFactory& picture_factory;
-    MediaController& media_controller;
+    PictureGenerator& picture_factory;
+    PlayController& media_controller;
     FacePipeline& face_pipeline;
 
     bool video_open_success;

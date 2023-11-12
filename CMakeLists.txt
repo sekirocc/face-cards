@@ -63,14 +63,9 @@ message("OpenCV_LIBS: ${OpenCV_LIBS}")
 
 
 
-set(VIDEO_SOURCES
-        video/picture_factory.h
-        video/video_picture.h
-        video/media_controller.h
-        video/media_controller.cpp
-        3rdparty/cppchannel/channel.h
-        3rdparty/cppchannel/channel.cpp
-)
+
+file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/video/*.cpp)
+file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/video/*.h)
 
 
 set(PROJECT_SOURCES
@@ -78,7 +73,8 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
-        ${VIDEO_SOURCES}
+        ${SOURCES}
+        ${HEADERS}
 )
 
 
@@ -88,10 +84,12 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         images.qrc
     )
+
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET human_card APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
 #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
+
 else()
     if(ANDROID)
         add_library(human_card SHARED
@@ -108,9 +106,7 @@ endif()
 
 
 
-
 target_include_directories(human_card PRIVATE
-        ${CMAKE_SOURCE_DIR}/3rdparty/cppchannel
         ${CMAKE_SOURCE_DIR}/video
         ${FFMPEG_INCLUDE_DIRS}
 )
@@ -125,6 +121,13 @@ target_link_libraries(human_card PRIVATE
         openvino::runtime
         donde::DondeToolkits
     )
+
+
+add_subdirectory(3rdparty/cpp-channel)
+
+target_include_directories(human_card PRIVATE
+        ${CMAKE_SOURCE_DIR}/3rdparty/cpp-channel/include
+)
 
 
 ##

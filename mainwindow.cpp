@@ -2,6 +2,7 @@
 
 #include "./ui_mainwindow.h"
 #include "libyuv.h"
+#include "utils.h"
 
 #include <QVideoFrame>
 #include <QVideoFrameFormat>
@@ -11,15 +12,15 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgproc.hpp>
 
-MainWindow::MainWindow(PictureFactory& pictureFactory,
-                       MediaController& mediaController,
-                       FacePipeline& facePipeline,
+MainWindow::MainWindow(PictureGenerator& picture_factory,
+                       PlayController& media_controller,
+                       FacePipeline& pipeline,
                        QWidget* parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow),
-      media_controller(mediaController),
-      picture_factory(pictureFactory),
-      face_pipeline(facePipeline) {
+      media_controller(media_controller),
+      picture_factory(picture_factory),
+      face_pipeline(pipeline) {
 
     ui->setupUi(this);
 
@@ -53,28 +54,65 @@ void MainWindow::show_video_cover() {
 
 void MainWindow::loop_video_pictures() {
     while (true) {
-        VideoPicture& pic = picture_factory.next();
-        cv::Mat mat(pic.Height(), pic.Width(), CV_8UC3, pic.frame->data[0], pic.frame->linesize[0]);
+        VideoPicture* pic = picture_factory.next();
+        if (pic == nullptr)
+            continue;
+
+        auto frame_width = pic->Width();
+        auto frame_height = pic->Height();
+        cv::Mat mat(
+            frame_height, frame_width, CV_8UC3, pic->frame->data[0], pic->frame->linesize[0]);
 
         // draw frame id
-        std::string picId = fmt::format("{}", pic.id_);
+        std::string pic_id = fmt::format("{}", pic->id_);
         cv::Point posi{100, 100};
         int face = cv::FONT_HERSHEY_PLAIN;
         double scale = 2;
         cv::Scalar color{255, 0, 0}; // blue, BGR
-        cv::putText(mat, picId, posi, face, scale, color, 2);
+        cv::putText(mat, pic_id, posi, face, scale, color, 2);
 
+        auto t1 = std::chrono::steady_clock::now();
         // detect face
         std::shared_ptr<donde_toolkits::DetectResult> detect_result = face_pipeline.Detect(mat);
         for (auto& face : detect_result->faces) {
             if (face.confidence > 0.8) {
                 cv::Rect box = face.box;
+                // FIXME: save to first detected cards?
+                auto copy = mat.clone();
+                detected_people_cards.at(0).images.push_back(human_card::CardImage{
+                    .big_frame = copy,
+                    .small_face = copy(box),
+                    .face_rect = box,
+                });
+                // draw on orignal mat
                 cv::rectangle(mat, box.tl(), box.br(), cv::Scalar(0, 255, 0));
             }
         }
+        auto [t2, used_ms] = time_since(t1);
+        printf("face pipeline detect use time: %lld ms, pic_id: %ld, detected faces: %ld\n",
+               used_ms.count(),
+               pic->id_,
+               detect_result->faces.size());
 
-        int progress = pic.id_ * 100 / video_total_frames;
-        pgb_video_process->setValue(progress);
+        ////  cv::Mat mat(pic.Height(), pic.Width(), CV_8UC3, pic.frame->data[0],
+        /// pic.frame->linesize[0]);
+
+        ////  // draw frame id
+        ////  std::string picId = fmt::format("{}", pic.id_);
+        ////  cv::Point posi{100, 100};
+        ////  int face = cv::FONT_HERSHEY_PLAIN;
+        ////  double scale = 2;
+        ////  cv::Scalar color{255, 0, 0}; // blue, BGR
+        ////  cv::putText(mat, picId, posi, face, scale, color, 2);
+
+        ////  // detect face
+        ////  std::shared_ptr<donde_toolkits::DetectResult> detect_result =
+        /// face_pipeline.Detect(mat); /  for (auto& face : detect_result->faces) { /      if
+        ///(face.confidence > 0.8) { /          cv::Rect box = face.box; / cv::rectangle(mat,
+        /// box.tl(), box.br(), cv::Scalar(0, 255, 0)); /      } /  }
+
+        ////  int progress = pic.id_ * 100 / video_total_frames;
+        ////  pgb_video_process->setValue(progress);
 
         display_cv_image(mat);
     }
@@ -163,7 +201,7 @@ void MainWindow::onStartBtnClicked() {
 
         SetVideoOpenSuccess(info.open_success);
         SetVideoTotalFrames(info.nb_frames);
-        SetVideoDurationSeconds(info.duration_s);
+        SetVideoDurationSeconds(info.duration_seconds);
 
         media_controller.Start();
         btn_start->setText("Pause");

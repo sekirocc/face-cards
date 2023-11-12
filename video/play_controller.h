@@ -1,6 +1,6 @@
 #pragma once
 
-#include "picture_factory.h"
+#include "picture_generator.h"
 
 #include <iostream>
 
@@ -22,7 +22,7 @@ struct MediaPlayState {
     size_t window_width;
     size_t window_height;
 
-    size_t progress;
+    float progress;
     int volume;
 
     std::string media_filepath;
@@ -30,24 +30,29 @@ struct MediaPlayState {
     size_t media_duration;
 };
 
-class MediaController {
-
-  public:
-    MediaController(FFmpegVideoProcessor& video_ctx);
+class PlayController {
+   public:
+    PlayController(FFmpegVideoProcessor& video_ctx);
 
     const MediaPlayState& CurrentState() const { return state; };
 
     VideoStreamInfo Reload(const std::string& filename);
 
-    bool Start();
-    bool Pause();
-    bool Resume();
-    bool Stop();
+    void Start();
+    void Pause();
+    void Resume();
+    void TogglePlay();
+    bool IsPlaying();
+    void Stop();
 
-    bool Forward(int step);
-    bool Backward(int step);
-    bool Seek(int position);
+    void Forward(int step);
+    void Backward(int step);
+    void Seek(int position);
 
+   private:
     MediaPlayState state;
     FFmpegVideoProcessor& video_processor;
+
+    VideoStreamInfo info;
+    long curr_frame_id = 0;
 };

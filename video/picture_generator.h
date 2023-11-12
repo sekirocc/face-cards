@@ -1,8 +1,9 @@
 #pragma once
 
-#include "channel.h"
-#include "video_picture.h"
+#include "picture.h"
+#include "msd/channel.hpp"
 
+#include <atomic>
 #include <chrono>
 #include <donde/video_process/ffmpeg_processor.h>
 #include <memory>
@@ -19,14 +20,13 @@ extern "C" {
 using donde_toolkits::video_process::FFmpegVideoFrameProcessor;
 using donde_toolkits::video_process::FFmpegVideoProcessor;
 
-class PictureFactory {
-  public:
-    PictureFactory(FFmpegVideoProcessor& video_processor, size_t pictures_len = 20)
-        : video_processor_{video_processor}, pictures_len(pictures_len), output_ch{pictures_len} {
+class PictureGenerator {
+   public:
+    PictureGenerator(FFmpegVideoProcessor& video_processor, size_t pictures_len = 20)
+        : video_processor_{video_processor}, pictures_len(pictures_len) {
         pictures = new VideoPicture[pictures_len];
 
-        FFmpegVideoFrameProcessor p(
-            std::bind(&PictureFactory::consume, this, std::placeholders::_1));
+        FFmpegVideoFrameProcessor p(std::bind(&PictureGenerator::consume, this, std::placeholders::_1));
 
         video_processor.Register(p);
 
@@ -35,15 +35,14 @@ class PictureFactory {
         record_time = std::chrono::steady_clock::now();
     };
 
-    ~PictureFactory() { delete[] pictures; }
+    ~PictureGenerator() { delete[] pictures; }
 
     bool consume(const donde_toolkits::video_process::FFmpegVideoFrame* vf) {
         const AVFrame* f = (const AVFrame*)vf->getFrame();
 
         frames_per_second++;
         auto now = std::chrono::steady_clock::now();
-        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - record_time).count()
-            >= 1000) {
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - record_time).count() >= 1000) {
             std::cout << "fps: " << frames_per_second << ", frame id: " << vf->getFrameId() << std::endl;
             frames_per_second = 0;
             record_time = now;
@@ -68,17 +67,17 @@ class PictureFactory {
         //           << std::endl;
 
         output_ch << &pic;
-
         return true;
     }
 
-    VideoPicture& next() {
+    VideoPicture* next() {
+        if (output_ch.empty()) return nullptr;
         VideoPicture* ptr;
         output_ch >> ptr;
-        return *ptr;
+        return ptr;
     }
 
-  private:
+   private:
     int frames_processed_ = 0;
 
     const FFmpegVideoProcessor& video_processor_;
@@ -86,7 +85,7 @@ class PictureFactory {
     VideoPicture* pictures;
     int pictures_len;
 
-    Channel<VideoPicture*> output_ch;
+    msd::channel<VideoPicture*> output_ch{1};
 
     int write_index = 0;
     int read_index = 0;
