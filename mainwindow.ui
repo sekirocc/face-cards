@@ -43,7 +43,7 @@
        <item>
         <widget class="QLineEdit" name="txt_video_filepath">
          <property name="text">
-          <string>/tmp/Iron_Man-Trailer_HD.mp4</string>
+          <string>./contrib/Iron_Man-Trailer_HD.mp4</string>
          </property>
         </widget>
        </item>
@@ -140,7 +140,7 @@
      <x>0</x>
      <y>0</y>
      <width>639</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

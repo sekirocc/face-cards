@@ -24,6 +24,10 @@ MainWindow::MainWindow(PictureGenerator& picture_factory,
 
     ui->setupUi(this);
 
+    detected_people_cards.push_back(human_card::PeopleCard{.name = "Alice", .show_card = false});
+    detected_people_cards.push_back(human_card::PeopleCard{.name = "Bob", .show_card = false});
+    detected_people_cards.push_back(human_card::PeopleCard{.name = "Candy", .show_card = false});
+
     video_display_widget = ui->video_display;
     video_display_sink = video_display_widget->videoSink();
 
