@@ -82,21 +82,38 @@ void MainWindow::loop_video_pictures() {
             if (face.confidence > 0.8) {
                 cv::Rect box = face.box;
                 // FIXME: save to first detected cards?
-                auto copy = mat.clone();
+                auto cloned = mat.clone();
+                auto size = cloned.size();
+                if (box.x <= 0 || box.x >= size.width) {
+                    continue;
+                }
+                if (box.y <= 0 || box.y >= size.height) {
+                    continue;
+                }
+                if (box.x + box.width > size.width) {
+                    std::cerr << "box width overflow!" << std::endl;
+                    box.width = size.width - box.x;
+                }
+                if (box.y + box.height > size.height) {
+                    std::cerr << "box height overflow!" << std::endl;
+                    box.height = size.height - box.y;
+                }
                 detected_people_cards.at(0).images.push_back(human_card::CardImage{
-                    .big_frame = copy,
-                    .small_face = copy(box),
+                    .big_frame = cloned,
+                    .small_face = cloned(box),
                     .face_rect = box,
                 });
                 // draw on orignal mat
                 cv::rectangle(mat, box.tl(), box.br(), cv::Scalar(0, 255, 0));
             }
         }
-        auto [t2, used_ms] = time_since(t1);
-        printf("face pipeline detect use time: %lld ms, pic_id: %ld, detected faces: %ld\n",
-               used_ms.count(),
-               pic->id_,
-               detect_result->faces.size());
+        if (pic->Id() % 30 == 0) {
+            auto [t2, used_ms] = time_since(t1);
+            printf("face pipeline detect use time: %lld ms, pic_id: %ld, detected faces: %ld\n",
+                   used_ms.count(),
+                   pic->id_,
+                   detect_result->faces.size());
+        }
 
         ////  cv::Mat mat(pic.Height(), pic.Width(), CV_8UC3, pic.frame->data[0],
         /// pic.frame->linesize[0]);
