@@ -39,9 +39,7 @@ message("FFMPEG_INCLUDE_DIRS ${FFMPEG_INCLUDE_DIRS}")
 ##
 ## Find DondeToolkits
 ##
-set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../cpp/donde-toolkits/install/cmake ${CMAKE_PREFIX_PATH})
-message("CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
-find_package(DondeToolkits CONFIG REQUIRED)
+set(DONDE_TOOLKITS_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../cpp/donde-toolkits/install/)
 
 
 
@@ -109,6 +107,7 @@ endif()
 target_include_directories(human_card PRIVATE
         ${CMAKE_SOURCE_DIR}/video
         ${FFMPEG_INCLUDE_DIRS}
+        ${DONDE_TOOLKITS_PATH}/include
 )
 
 
@@ -119,7 +118,8 @@ target_link_libraries(human_card PRIVATE
         ${FFMPEG_LIBRARIES}
         ${OpenCV_LIBS}
         openvino::runtime
-        donde::DondeToolkits
+        ${DONDE_TOOLKITS_PATH}/libfeature_extract.a
+        ${DONDE_TOOLKITS_PATH}/libvideo_process.a
     )
 
 
