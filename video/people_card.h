@@ -13,6 +13,5 @@ struct CardImage {
 struct PeopleCard {
     std::string name;
     std::vector<CardImage> images;
-    bool show_card;
 };
 }  // namespace human_card

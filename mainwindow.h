@@ -12,6 +12,7 @@
 #include <qabstractspinbox.h>
 #include <qprogressbar.h>
 #include <qpushbutton.h>
+#include <qboxlayout.h>
 
 using donde_toolkits::feature_extract::FacePipeline;
 
@@ -44,6 +45,9 @@ class MainWindow : public QMainWindow {
     void display_arbg_image(const QImage& imageARBG);
     void display_picture(const VideoPicture& pic);
 
+    void update_detected_people();
+    void update_selected_section(int i, bool collapsed);
+
   private slots:
     void onStartBtnClicked();
     void onStopBtnClicked();
@@ -56,6 +60,9 @@ class MainWindow : public QMainWindow {
 
     QLineEdit* txt_video_filepath;
     std::vector<human_card::PeopleCard> detected_people_cards;
+    int selected_people_card_index = -1;
+
+    QWidget* detected_people_area;
 
     QPushButton* btn_stop;
     QPushButton* btn_start;

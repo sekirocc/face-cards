@@ -6,6 +6,8 @@
 #include "play_controller.h"
 
 #include <QApplication>
+#include <QScreen>
+#include <QStyle>
 
 using json = nlohmann::json;
 using donde_toolkits::feature_extract::FacePipeline;
@@ -13,7 +15,7 @@ using donde_toolkits::video_process::FFmpegVideoFrameProcessor;
 using donde_toolkits::video_process::FFmpegVideoProcessor;
 
 int main(int argc, char* argv[]) {
-    QApplication a(argc, argv);
+    QApplication app(argc, argv);
 
     json conf = R"(
     {
@@ -36,7 +38,11 @@ int main(int argc, char* argv[]) {
     PlayController controller{p};
 
     MainWindow w{factory, controller, pipeline};
-    w.show();
+    QRect fullScreenGeometry = app.primaryScreen()->availableGeometry();
+    QSize windowSize = fullScreenGeometry.size();
+    w.setGeometry(
+        QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, windowSize, fullScreenGeometry));
 
-    return a.exec();
+    w.show();
+    return app.exec();
 }

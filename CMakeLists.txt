@@ -16,7 +16,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 ## QT6
 ##
 
-set(CMAKE_PREFIX_PATH "/opt/Qt/6.5.3/gcc_64" ${CMAKE_PREFIX_PATH})
+## set(CMAKE_PREFIX_PATH "/opt/Qt/6.5.3/gcc_64" ${CMAKE_PREFIX_PATH})
 message("CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
 find_package(QT NAMES Qt6 Qt5
         REQUIRED COMPONENTS Widgets)
@@ -62,8 +62,8 @@ message("OpenCV_LIBS: ${OpenCV_LIBS}")
 
 
 
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/video/*.cpp)
-file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/video/*.h)
+file(GLOB VIDEO_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/video/*.cpp)
+file(GLOB VIDEO_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/video/*.h)
 
 
 set(PROJECT_SOURCES
@@ -71,8 +71,10 @@ set(PROJECT_SOURCES
         mainwindow.cpp
         mainwindow.h
         mainwindow.ui
-        ${SOURCES}
-        ${HEADERS}
+        3rdparty/qt-collapsible-section/Section.h
+        3rdparty/qt-collapsible-section/Section.cpp
+        ${VIDEO_SOURCES}
+        ${VIDEO_HEADERS}
 )
 
 
@@ -105,11 +107,11 @@ endif()
 
 
 target_include_directories(human_card PRIVATE
-        ${CMAKE_SOURCE_DIR}/video
-        ${FFMPEG_INCLUDE_DIRS}
+        video
+        3rdparty/qt-collapsible-section
         ${DONDE_TOOLKITS_PATH}/include
+        ${FFMPEG_INCLUDE_DIRS}
 )
-
 
 target_link_libraries(human_card PRIVATE
         Qt${QT_VERSION_MAJOR}::Widgets
@@ -133,7 +135,7 @@ target_include_directories(human_card PRIVATE
 ##
 ## Conan
 ##
-set(CMAKE_PREFIX_PATH "build" ${CMAKE_PREFIX_PATH})
+set(CMAKE_PREFIX_PATH "cmake-build-debug" ${CMAKE_PREFIX_PATH})
 find_package(fmt REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(Poco REQUIRED)
@@ -150,7 +152,8 @@ target_link_libraries(${PROJECT_NAME}
     libyuv::libyuv
     nlohmann_json::nlohmann_json
 )
-target_include_directories(${PROJECT_NAME}
+
+target_include_directories(human_card
     BEFORE
     PRIVATE
     ${CMAKE_INCLUDE_PATH}

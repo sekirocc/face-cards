@@ -1,3 +1,6 @@
 [submodule "3rdparty/cpp-channel"]
 	path = 3rdparty/cpp-channel
 	url = https://github.com/andreiavrammsd/cpp-channel.git
+[submodule "3rdparty/qt-collapsible-section"]
+	path = 3rdparty/qt-collapsible-section
+	url = https://github.com/MichaelVoelkel/qt-collapsible-section.git

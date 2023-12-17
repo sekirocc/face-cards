@@ -36,7 +36,7 @@
           <string notr="true">background: green; color: white; font-weight: bold</string>
          </property>
          <property name="text">
-          <string>video:</string>
+          <string>Path</string>
          </property>
         </widget>
        </item>
@@ -83,11 +83,20 @@
         <widget class="QVideoWidget" name="video_display" native="true"/>
        </item>
        <item>
-        <widget class="QWidget" name="widget_2" native="true">
-         <layout class="QHBoxLayout" name="horizontalLayout">
-          <item>
-           <widget class="QListWidget" name="list_detected_humans"/>
-          </item>
+        <widget class="QWidget" name="detected_people_area" native="true">
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
          </layout>
         </widget>
        </item>
@@ -109,8 +118,23 @@
        <property name="leftMargin">
         <number>0</number>
        </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>0</number>
+       </property>
        <item>
         <widget class="QProgressBar" name="pgb_video_process">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="value">
           <number>0</number>
          </property>
@@ -125,7 +149,7 @@
           <string notr="true">background: red; color: white; font-weight: bold</string>
          </property>
          <property name="text">
-          <string>detected face!</string>
+          <string>detected</string>
          </property>
         </widget>
        </item>

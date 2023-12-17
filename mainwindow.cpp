@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 
 #include "./ui_mainwindow.h"
+#include "Section.h"
 #include "libyuv.h"
 #include "utils.h"
 
@@ -8,9 +9,11 @@
 #include <QVideoFrameFormat>
 #include <QVideoSink>
 #include <fmt/format.h>
+#include <functional>
 #include <iostream>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgproc.hpp>
+using namespace std::placeholders;
 
 MainWindow::MainWindow(PictureGenerator& picture_factory,
                        PlayController& media_controller,
@@ -24,9 +27,12 @@ MainWindow::MainWindow(PictureGenerator& picture_factory,
 
     ui->setupUi(this);
 
-    detected_people_cards.push_back(human_card::PeopleCard{.name = "Alice", .show_card = false});
-    detected_people_cards.push_back(human_card::PeopleCard{.name = "Bob", .show_card = false});
-    detected_people_cards.push_back(human_card::PeopleCard{.name = "Candy", .show_card = false});
+    detected_people_cards.push_back(human_card::PeopleCard{.name = "Alice"});
+    detected_people_cards.push_back(human_card::PeopleCard{.name = "Bob"});
+    detected_people_cards.push_back(human_card::PeopleCard{.name = "Candy"});
+
+    detected_people_area = ui->detected_people_area;
+    update_detected_people();
 
     video_display_widget = ui->video_display;
     video_display_sink = video_display_widget->videoSink();
@@ -253,4 +259,47 @@ void MainWindow::SetVideoOpenSuccess(bool succ) {
     }
 };
 void MainWindow::SetVideoDurationSeconds(int64_t duration) { video_duration_s = duration; };
-void MainWindow::SetVideoTotalFrames(int64_t total_frames) { video_total_frames = total_frames; };
+void MainWindow::SetVideoTotalFrames(int64_t total_frames) { video_total_frames = total_frames; }
+
+void MainWindow::update_detected_people() {
+    auto area_vboxlayout = detected_people_area->layout();
+    for (auto& child : area_vboxlayout->children()) {
+        child->deleteLater();
+    }
+
+    for (int i = 0; i < detected_people_cards.size(); i++) {
+        auto& card = detected_people_cards[i];
+        auto sec = new ui::Section(QString::fromStdString(card.name), 300);
+        connect(sec->toggleButton,
+                &QToolButton::toggled,
+                this,
+                std::bind(&MainWindow::update_selected_section, this, i, _1));
+        auto content = new QHBoxLayout();
+        auto cover = QImage("://resources/images/video_cover.png");
+        auto image_label = new QLabel();
+        image_label->setPixmap(QPixmap::fromImage(cover));
+        content->addWidget(image_label);
+        sec->setContentLayout(*content);
+        area_vboxlayout->addWidget(sec);
+    }
+}
+
+void MainWindow::update_selected_section(int index, bool collapsed) {
+    qDebug() << "index: " << index << ", collapsed: " << collapsed;
+    int last_selected_people_card_index = selected_people_card_index;
+    selected_people_card_index = index;
+    // auto sections = detected_people_area->children();
+    auto sections = detected_people_area->findChildren<QWidget*>();
+    for (int i = 0; i < sections.size(); i++) {
+        auto section = (ui::Section*)sections.at(i);
+        if (i == selected_people_card_index) {
+            qDebug() << "match one!";
+            section->toggle(collapsed);
+        } else if (i == last_selected_people_card_index) {
+            qDebug() << "not match, collapse it!";
+            section->toggle(false);
+        }
+        qDebug() << "updateHeights!";
+        section->updateHeights();
+    }
+};
