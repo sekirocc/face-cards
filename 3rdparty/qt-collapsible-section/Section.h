@@ -34,10 +34,8 @@ namespace ui
     {
         Q_OBJECT
 
-    public:
-        QToolButton* toggleButton;
-
     private:
+        QToolButton* toggleButton;
         QGridLayout* mainLayout;
         QFrame* headerLine;
         QParallelAnimationGroup* toggleAnimation;
@@ -45,7 +43,7 @@ namespace ui
         int animationDuration;
         int collapsedHeight;
         bool isExpanded = false;
-        
+
     public slots:
         void toggle(bool collapsed);
 

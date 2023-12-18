@@ -12,11 +12,13 @@ PlayController::PlayController(FFmpegVideoProcessor& processor) : video_processo
 VideoStreamInfo PlayController::Reload(const std::string& filename) {
     info = video_processor.OpenVideoContext(filename);
     std::cout << fmt::format(
-        "open video info: nb_frames {}, avg_frame_rate: {}, duration_seconds: {}, total_frames: {}",
+        "open video info: nb_frames {}, avg_frame_rate: {}, duration_seconds: {}, total_frames: {}, width: {}, height: {}",
         info.nb_frames,
         info.avg_frame_rate,
         info.duration_seconds,
-        info.avg_frame_rate * info.duration_seconds);
+        info.avg_frame_rate * info.duration_seconds,
+        info.width,
+        info.height);
     return info;
 }
 

@@ -64,7 +64,7 @@ namespace ui
         mainLayout->addWidget(contentArea, row, 0, 1, 3);
         setLayout(mainLayout);
 
-        // connect(toggleButton, &QToolButton::toggled, this, &Section::toggle);
+        connect(toggleButton, &QToolButton::toggled, this, &Section::toggle);
     }
 
     void Section::toggle(bool expanded)

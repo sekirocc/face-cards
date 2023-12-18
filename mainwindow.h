@@ -46,7 +46,6 @@ class MainWindow : public QMainWindow {
     void display_picture(const VideoPicture& pic);
 
     void update_detected_people();
-    void update_selected_section(int i, bool collapsed);
 
   private slots:
     void onStartBtnClicked();
