@@ -1,4 +1,6 @@
 #include "play_controller.h"
+
+#define FMT_HEADER_ONLY
 #include "fmt/format.h"
 
 #include <donde/video_process/ffmpeg_processor.h>
