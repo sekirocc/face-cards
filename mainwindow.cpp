@@ -27,9 +27,9 @@ MainWindow::MainWindow(PictureGenerator& picture_factory,
 
     ui->setupUi(this);
 
-    detected_people_cards.push_back(human_card::PeopleCard{.name = "Alice"});
-    detected_people_cards.push_back(human_card::PeopleCard{.name = "Bob"});
-    detected_people_cards.push_back(human_card::PeopleCard{.name = "Candy"});
+    detected_people_cards.insert({"alice", human_card::PeopleCard{.name = "Alice"}});
+    detected_people_cards.insert({"bob", human_card::PeopleCard{.name = "Bob"}});
+    detected_people_cards.insert({"candy", human_card::PeopleCard{.name = "Candy"}});
 
     detected_people_area = ui->scrollAreaWidgetContents;
     update_detected_people();
@@ -236,7 +236,8 @@ void MainWindow::onStartBtnClicked() {
 
         int new_width = info.width * 1.0 / info.height * height;
         video_display_widget->setFixedWidth(new_width);
-        qDebug() << "video widget height: " << height << " width: " << width << ", new_width" << new_width;
+        qDebug() << "video widget height: " << height << " width: " << width << ", new_width"
+                 << new_width;
         qDebug() << "video meta height: " << info.height << " width: " << info.width;
 
         media_controller.Start();

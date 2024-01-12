@@ -58,7 +58,8 @@ class MainWindow : public QMainWindow {
     QVideoSink* video_display_sink;
 
     QLineEdit* txt_video_filepath;
-    std::vector<human_card::PeopleCard> detected_people_cards;
+    // std::vector<human_card::PeopleCard> detected_people_cards;
+    std::unordered_map<std::string, human_card::PeopleCard> detected_people_cards;
     int selected_people_card_index = -1;
 
     QWidget* detected_people_area;
