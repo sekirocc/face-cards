@@ -135,14 +135,13 @@ target_include_directories(human_card PRIVATE
 ##
 ## Conan
 ##
-set(CMAKE_PREFIX_PATH "cmake-build-debug" ${CMAKE_PREFIX_PATH})
 find_package(fmt REQUIRED)
 find_package(spdlog REQUIRED)
 find_package(Poco REQUIRED)
 find_package(SQLiteCpp REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(libyuv REQUIRED)
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(human_card
     PRIVATE
     fmt::fmt
     spdlog::spdlog
