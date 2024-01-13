@@ -36,10 +36,10 @@ namespace ui
 
     private:
         QToolButton* toggleButton;
-        QGridLayout* mainLayout;
+        QVBoxLayout* mainLayout;
         QFrame* headerLine;
         QParallelAnimationGroup* toggleAnimation;
-        QScrollArea* contentArea;
+        QWidget* contentArea;
         int animationDuration;
         int collapsedHeight;
         bool isExpanded = false;
@@ -57,11 +57,14 @@ namespace ui
         void setContentLayout(QLayout& contentLayout);
         QLayout* getContentLayout();
 
+
         // set title
         void setTitle(QString title);
 
         // update animations and their heights
         void updateHeights();
+
+        void resizeEvent(QResizeEvent *event) override;
     };
 }
 

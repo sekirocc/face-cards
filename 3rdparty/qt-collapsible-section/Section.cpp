@@ -30,8 +30,8 @@ namespace ui
         toggleButton = new QToolButton(this);
         headerLine = new QFrame(this);
         toggleAnimation = new QParallelAnimationGroup(this);
-        contentArea = new QScrollArea(this);
-        mainLayout = new QGridLayout(this);
+        contentArea = new QWidget(this);
+        mainLayout = new QVBoxLayout(this);
 
         toggleButton->setStyleSheet("QToolButton {border: none;}");
         toggleButton->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -44,7 +44,7 @@ namespace ui
         headerLine->setFrameShadow(QFrame::Sunken);
         headerLine->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
 
-        contentArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+        contentArea->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
         // start out collapsed
         contentArea->setMaximumHeight(0);
@@ -55,14 +55,20 @@ namespace ui
         toggleAnimation->addAnimation(new QPropertyAnimation(this, "minimumHeight"));
         toggleAnimation->addAnimation(new QPropertyAnimation(contentArea, "maximumHeight"));
 
-        mainLayout->setVerticalSpacing(0);
-        mainLayout->setContentsMargins(0, 0, 0, 0);
 
-        int row = 0;
-        mainLayout->addWidget(toggleButton, row, 0, 1, 1, Qt::AlignLeft);
-        mainLayout->addWidget(headerLine, row++, 2, 1, 1);
-        mainLayout->addWidget(contentArea, row, 0, 1, 3);
+        auto headerWidget = new QWidget();
+        auto headerLayout = new QHBoxLayout();
+        headerWidget->setLayout(headerLayout);
+        headerLayout->addWidget(toggleButton);
+        headerLayout->addWidget(headerLine);
+
+        mainLayout->addWidget(headerWidget);
+        mainLayout->addWidget(contentArea);
+        mainLayout->setStretch(0, 0);
+        mainLayout->setStretch(1, 1);
+        mainLayout->setContentsMargins(0, 0, 0, 0);
         setLayout(mainLayout);
+        setStyleSheet("border: 1px solid red;");
 
         connect(toggleButton, &QToolButton::toggled, this, &Section::toggle);
     }
@@ -96,9 +102,15 @@ namespace ui
         toggleButton->setText(std::move(title));
     }
 
+    void Section::resizeEvent(QResizeEvent *event)  {
+        updateHeights();
+        QWidget::resizeEvent(event);
+    }
+
     void Section::updateHeights()
     {
-        int contentHeight = contentArea->layout()->sizeHint().height();
+        int contentHeight = contentArea->layout()->heightForWidth(width());
+        qDebug() << "contentHeight: " << contentHeight;
 
         for (int i = 0; i < toggleAnimation->animationCount() - 1; ++i)
         {

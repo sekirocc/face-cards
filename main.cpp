@@ -37,11 +37,9 @@ int main(int argc, char* argv[]) {
     PictureGenerator factory{p};
     PlayController controller{p};
 
-    MainWindow w{factory, controller, pipeline};
     QRect fullScreenGeometry = app.primaryScreen()->availableGeometry();
     QSize windowSize = fullScreenGeometry.size();
-    w.setGeometry(
-        QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, windowSize, fullScreenGeometry));
+    MainWindow w{factory, controller, pipeline, windowSize, fullScreenGeometry};
 
     w.show();
     return app.exec();

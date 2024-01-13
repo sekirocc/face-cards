@@ -32,6 +32,8 @@ class MainWindow : public QMainWindow {
     MainWindow(PictureGenerator& picture_factory,
                PlayController& media_controller,
                FacePipeline& pipeline,
+               QSize windowSize,
+               QRect windowRect,
                QWidget* parent = nullptr);
 
     ~MainWindow();

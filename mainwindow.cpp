@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 
 #include "./ui_mainwindow.h"
+#include "3rdparty/flowlayout/flowlayout.h"
 #include "Section.h"
 #include "libyuv.h"
 #include "utils.h"
@@ -20,12 +21,18 @@ using namespace std::placeholders;
 MainWindow::MainWindow(PictureGenerator& picture_factory,
                        PlayController& media_controller,
                        FacePipeline& pipeline,
+                       QSize windowSize,
+                       QRect windowRect,
                        QWidget* parent)
     : QMainWindow(parent),
       ui(new Ui::MainWindow),
       media_controller(media_controller),
       picture_factory(picture_factory),
       face_pipeline(pipeline) {
+
+    qDebug() << "windowSize: " << windowSize << ", windowRect: " << windowRect;
+    this->setGeometry(
+        QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, windowSize, windowRect));
 
     ui->setupUi(this);
 
@@ -58,10 +65,9 @@ MainWindow::MainWindow(PictureGenerator& picture_factory,
                                                              {},
                                                          }}});
 
-    un_classified_card_images.push_back(human_card::CardImage());
-    un_classified_card_images.push_back(human_card::CardImage());
-    un_classified_card_images.push_back(human_card::CardImage());
-    un_classified_card_images.push_back(human_card::CardImage());
+    for (int i = 0; i < 3; i++) {
+        un_classified_card_images.push_back(human_card::CardImage());
+    }
 
     detected_people_area = ui->scrollAreaWidgetContents;
     init_detected_card_images_area();
@@ -319,7 +325,8 @@ ui::Section* MainWindow::create_section(const std::string& name, const CardImage
     auto widget_name = "section-" + name;
     section->setObjectName(widget_name);
 
-    auto contentLayout = new QHBoxLayout();
+    auto contentLayout = new FlowLayout();
+
     for (auto& img : card_images) {
         // FIXME: use real image
         auto placeholder = QImage("://resources/images/1F9D1_color.png").scaled(100, 100);
@@ -327,9 +334,9 @@ ui::Section* MainWindow::create_section(const std::string& name, const CardImage
         image_label->setPixmap(QPixmap::fromImage(placeholder));
         contentLayout->addWidget(image_label);
     }
-    contentLayout->addStretch();
 
     section->setContentLayout(*contentLayout);
+    // connect(contentLayout, &FlowLayout::heightChanged, section, &ui::Section::setMinimumHeight);
     return section;
 }
 
@@ -352,7 +359,8 @@ void MainWindow::update_section(const std::string& name, const CardImageList& ca
 
     auto widget_name = "section-" + name;
     auto section = detected_people_area->findChild<ui::Section*>(widget_name.c_str());
-    QHBoxLayout* layout = dynamic_cast<QHBoxLayout*>(section->getContentLayout());
+
+    FlowLayout* layout = dynamic_cast<FlowLayout*>(section->getContentLayout());
     if (!layout) {
         std::cerr << "illegal state, section layout is not QHBoxLayout?? " << std::endl;
     }
@@ -366,6 +374,8 @@ void MainWindow::update_section(const std::string& name, const CardImageList& ca
         auto placeholder = QImage("://resources/images/1F9D1_color.png").scaled(100, 100);
         auto image_label = new QLabel();
         image_label->setPixmap(QPixmap::fromImage(placeholder));
-        layout->insertWidget(0, image_label);
+        layout->addWidget(image_label);
     }
+
+    section->updateHeights();
 }

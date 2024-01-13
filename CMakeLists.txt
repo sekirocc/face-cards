@@ -73,6 +73,8 @@ set(PROJECT_SOURCES
         mainwindow.ui
         3rdparty/qt-collapsible-section/Section.h
         3rdparty/qt-collapsible-section/Section.cpp
+        3rdparty/flowlayout/flowlayout.h
+        3rdparty/flowlayout/flowlayout.cpp
         ${VIDEO_SOURCES}
         ${VIDEO_HEADERS}
 )
