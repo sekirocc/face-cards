@@ -72,9 +72,9 @@ namespace ui
         toggleButton->setArrowType(expanded ? Qt::ArrowType::DownArrow : Qt::ArrowType::RightArrow);
         toggleAnimation->setDirection(expanded ? QAbstractAnimation::Forward : QAbstractAnimation::Backward);
         toggleAnimation->start();
-        
+
         this->isExpanded = expanded;
-        
+
         qDebug() << "MV: toggle: isExpanded " << isExpanded;
     }
 
@@ -83,15 +83,19 @@ namespace ui
         delete contentArea->layout();
         contentArea->setLayout(&contentLayout);
         collapsedHeight = sizeHint().height() - contentArea->maximumHeight();
-        
+
         updateHeights();
     }
-    
+
+    QLayout* Section::getContentLayout() {
+        return contentArea->layout();
+    }
+
     void Section::setTitle(QString title)
     {
         toggleButton->setText(std::move(title));
     }
-    
+
     void Section::updateHeights()
     {
         int contentHeight = contentArea->layout()->sizeHint().height();
@@ -108,7 +112,7 @@ namespace ui
         contentAnimation->setDuration(animationDuration);
         contentAnimation->setStartValue(0);
         contentAnimation->setEndValue(contentHeight);
-        
+
         toggleAnimation->setDirection(isExpanded ? QAbstractAnimation::Forward : QAbstractAnimation::Backward);
         toggleAnimation->start();
     }

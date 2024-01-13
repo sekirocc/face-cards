@@ -49,16 +49,17 @@ namespace ui
 
     public:
         static const int DEFAULT_DURATION = 0;
-    
+
         // initialize section
         explicit Section(const QString& title = "", const int animationDuration = DEFAULT_DURATION, QWidget* parent = 0);
 
         // set layout of content
         void setContentLayout(QLayout& contentLayout);
-        
+        QLayout* getContentLayout();
+
         // set title
         void setTitle(QString title);
-        
+
         // update animations and their heights
         void updateHeights();
     };

@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "Section.h"
 #include "people_card.h"
 #include "picture_generator.h"
 #include "play_controller.h"
@@ -10,9 +11,9 @@
 #include <donde/feature_extract/face_pipeline.h>
 #include <opencv2/core/mat.hpp>
 #include <qabstractspinbox.h>
+#include <qboxlayout.h>
 #include <qprogressbar.h>
 #include <qpushbutton.h>
-#include <qboxlayout.h>
 
 using donde_toolkits::feature_extract::FacePipeline;
 
@@ -21,6 +22,8 @@ namespace Ui {
 class MainWindow;
 }
 QT_END_NAMESPACE
+
+using CardImageList = std::vector<human_card::CardImage>;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -47,9 +50,16 @@ class MainWindow : public QMainWindow {
 
     void init_detected_card_images_area();
 
+    void update_section(const std::string& name, const CardImageList& images);
+    ui::Section* create_section(const std::string& name, const CardImageList& images);
+    void update_sections_if_need();
+
   private slots:
     void onStartBtnClicked();
     void onStopBtnClicked();
+
+  signals:
+    void updateUI();
 
   private:
     Ui::MainWindow* ui;
@@ -60,7 +70,7 @@ class MainWindow : public QMainWindow {
     QLineEdit* txt_video_filepath;
     // std::vector<human_card::PeopleCard> detected_people_cards;
     std::unordered_map<std::string, human_card::PeopleCard> detected_people_cards;
-    std::list<human_card::CardImage> un_classified_card_images;
+    std::vector<human_card::CardImage> un_classified_card_images;
     int selected_people_card_index = -1;
 
     QWidget* detected_people_area;

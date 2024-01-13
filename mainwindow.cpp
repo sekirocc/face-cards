@@ -8,11 +8,13 @@
 #include <QVideoFrame>
 #include <QVideoFrameFormat>
 #include <QVideoSink>
+#include <chrono>
 #include <fmt/format.h>
 #include <functional>
 #include <iostream>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgproc.hpp>
+
 using namespace std::placeholders;
 
 MainWindow::MainWindow(PictureGenerator& picture_factory,
@@ -81,6 +83,8 @@ MainWindow::MainWindow(PictureGenerator& picture_factory,
 
     connect(btn_start, &QPushButton::clicked, this, &MainWindow::onStartBtnClicked);
     connect(btn_stop, &QPushButton::clicked, this, &MainWindow::onStopBtnClicked);
+
+    connect(this, &MainWindow::updateUI, this, &MainWindow::update_sections_if_need);
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -97,6 +101,8 @@ void MainWindow::loop_video_pictures() {
         VideoPicture* pic = picture_factory.next();
         if (pic == nullptr)
             continue;
+
+        auto should_sample = pic->Id() % 30 == 0;
 
         auto frame_width = pic->Width();
         auto frame_height = pic->Height();
@@ -135,40 +141,28 @@ void MainWindow::loop_video_pictures() {
                     box.height = size.height - box.y;
                 }
 
-                un_classified_card_images.emplace_back(cloned, cloned(box), box);
                 // draw on original mat
                 cv::rectangle(mat, box.tl(), box.br(), cv::Scalar(0, 255, 0));
+
+                if (should_sample) {
+                    un_classified_card_images.emplace_back(cloned, cloned(box), box);
+                }
             }
         }
-        if (pic->Id() % 30 == 0) {
-            auto [t2, used_ms] = time_since(t1);
+
+        if (should_sample) {
+            auto [t2, used_ms] = now_time_since(t1);
             printf("face pipeline detect use time: %lld ms, pic_id: %ld, detected faces: %ld\n",
                    used_ms.count(),
                    pic->id_,
                    detect_result->faces.size());
         }
 
-        ////  cv::Mat mat(pic.Height(), pic.Width(), CV_8UC3, pic.frame->data[0],
-        /// pic.frame->linesize[0]);
-
-        ////  // draw frame id
-        ////  std::string picId = fmt::format("{}", pic.id_);
-        ////  cv::Point posi{100, 100};
-        ////  int face = cv::FONT_HERSHEY_PLAIN;
-        ////  double scale = 2;
-        ////  cv::Scalar color{255, 0, 0}; // blue, BGR
-        ////  cv::putText(mat, picId, posi, face, scale, color, 2);
-
-        ////  // detect face
-        ////  std::shared_ptr<donde_toolkits::DetectResult> detect_result =
-        /// face_pipeline.Detect(mat); /  for (auto& face : detect_result->faces) { /      if
-        ///(face.confidence > 0.8) { /          cv::Rect box = face.box; / cv::rectangle(mat,
-        /// box.tl(), box.br(), cv::Scalar(0, 255, 0)); /      } /  }
-
-        ////  int progress = pic.id_ * 100 / video_total_frames;
-        ////  pgb_video_process->setValue(progress);
-
         display_cv_image(mat);
+
+        if (should_sample) {
+            emit updateUI();
+        }
     }
 }
 
@@ -294,54 +288,84 @@ void MainWindow::SetVideoOpenSuccess(bool succ) {
     if (!video_open_success) {
         // TODO do what?
     }
-};
-void MainWindow::SetVideoDurationSeconds(int64_t duration) { video_duration_s = duration; };
+}
+
+void MainWindow::SetVideoDurationSeconds(int64_t duration) { video_duration_s = duration; }
+
 void MainWindow::SetVideoTotalFrames(int64_t total_frames) { video_total_frames = total_frames; }
 
 void MainWindow::init_detected_card_images_area() {
-    QVBoxLayout* area_vboxlayout = new QVBoxLayout();
-
-    // if (detected_people_area->layout() != nullptr) {
-    //     for (auto& child : detected_people_area->layout()->children()) {
-    //         child->deleteLater();
-    //     }
-    // }
+    QVBoxLayout* layout = new QVBoxLayout();
 
     // insert un-classified images
     {
-        auto section = new ui::Section(QString::fromStdString("unclassified"));
-        section->setObjectName("section-unclassified");
-
-        auto contentLayout = new QHBoxLayout();
-        for (auto& card_image : un_classified_card_images) {
-            auto placeholder = QImage("://resources/images/OIP-C.jpg").scaled(100, 100);
-            auto image_label = new QLabel();
-            image_label->setPixmap(QPixmap::fromImage(placeholder));
-            contentLayout->addWidget(image_label);
-        }
-        contentLayout->addStretch();
-
-        section->setContentLayout(*contentLayout);
-        area_vboxlayout->addWidget(section);
+        auto section_widget = create_section("unclassified", un_classified_card_images);
+        layout->addWidget(section_widget);
     }
 
+    // insert normal card image
     for (auto& [name, card] : detected_people_cards) {
-        auto section = new ui::Section(QString::fromStdString(name));
-        section->setObjectName("section-" + name);
-
-        auto contentLayout = new QHBoxLayout();
-        for (auto& img : card.images) {
-            auto placeholder = QImage("://resources/images/1F9D1_color.png").scaled(100, 100);
-            auto image_label = new QLabel();
-            image_label->setPixmap(QPixmap::fromImage(placeholder));
-            contentLayout->addWidget(image_label);
-        }
-        contentLayout->addStretch();
-
-        section->setContentLayout(*contentLayout);
-        area_vboxlayout->addWidget(section);
+        auto section_widget = create_section(name, card.images);
+        layout->addWidget(section_widget);
     }
-    area_vboxlayout->setAlignment(Qt::AlignTop);
-    detected_people_area->setLayout(area_vboxlayout);
-    detected_people_area->children();
+
+    layout->setAlignment(Qt::AlignTop);
+    detected_people_area->setLayout(layout);
+}
+
+ui::Section* MainWindow::create_section(const std::string& name, const CardImageList& card_images) {
+    auto section = new ui::Section(QString::fromStdString(name));
+
+    auto widget_name = "section-" + name;
+    section->setObjectName(widget_name);
+
+    auto contentLayout = new QHBoxLayout();
+    for (auto& img : card_images) {
+        // FIXME: use real image
+        auto placeholder = QImage("://resources/images/1F9D1_color.png").scaled(100, 100);
+        auto image_label = new QLabel();
+        image_label->setPixmap(QPixmap::fromImage(placeholder));
+        contentLayout->addWidget(image_label);
+    }
+    contentLayout->addStretch();
+
+    section->setContentLayout(*contentLayout);
+    return section;
+}
+
+void MainWindow::update_sections_if_need() {
+    static auto t1 = std::chrono::steady_clock::now();
+    auto [now, used_ms] = now_time_since(t1);
+    if (used_ms.count() >= 1000) {
+        qDebug() << "run update_sections_if_need";
+
+        update_section("unclassified", un_classified_card_images);
+        for (auto& [name, card] : detected_people_cards) {
+            update_section(name, card.images);
+        }
+        t1 = now;
+    }
+}
+
+void MainWindow::update_section(const std::string& name, const CardImageList& card_images) {
+    qDebug() << "update_section for " << name << ", image size: " << card_images.size();
+
+    auto widget_name = "section-" + name;
+    auto section = detected_people_area->findChild<ui::Section*>(widget_name.c_str());
+    QHBoxLayout* layout = dynamic_cast<QHBoxLayout*>(section->getContentLayout());
+    if (!layout) {
+        std::cerr << "illegal state, section layout is not QHBoxLayout?? " << std::endl;
+    }
+    auto children = layout->findChildren<QLabel*>();
+    for (auto& child : children) {
+        layout->removeWidget(child);
+    }
+
+    for (auto& img : card_images) {
+        // FIXME: use real image
+        auto placeholder = QImage("://resources/images/1F9D1_color.png").scaled(100, 100);
+        auto image_label = new QLabel();
+        image_label->setPixmap(QPixmap::fromImage(placeholder));
+        layout->insertWidget(0, image_label);
+    }
 }
