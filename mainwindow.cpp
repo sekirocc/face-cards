@@ -27,12 +27,42 @@ MainWindow::MainWindow(PictureGenerator& picture_factory,
 
     ui->setupUi(this);
 
-    detected_people_cards.insert({"alice", human_card::PeopleCard{.name = "Alice"}});
-    detected_people_cards.insert({"bob", human_card::PeopleCard{.name = "Bob"}});
-    detected_people_cards.insert({"candy", human_card::PeopleCard{.name = "Candy"}});
+    detected_people_cards.insert({"alice",
+                                  human_card::PeopleCard{.name = "Alice",
+                                                         .images = {
+                                                             {},
+                                                             {},
+                                                             {},
+                                                             {},
+                                                             {},
+                                                             {},
+                                                         }}});
+
+    detected_people_cards.insert({"bob",
+                                  human_card::PeopleCard{.name = "Bob",
+                                                         .images = {
+                                                             {},
+                                                             {},
+                                                             {},
+                                                             {},
+                                                             {},
+                                                         }}});
+
+    detected_people_cards.insert({"candy",
+                                  human_card::PeopleCard{.name = "Candy",
+                                                         .images = {
+                                                             {},
+                                                             {},
+                                                             {},
+                                                         }}});
+
+    un_classified_card_images.push_back(human_card::CardImage());
+    un_classified_card_images.push_back(human_card::CardImage());
+    un_classified_card_images.push_back(human_card::CardImage());
+    un_classified_card_images.push_back(human_card::CardImage());
 
     detected_people_area = ui->scrollAreaWidgetContents;
-    update_detected_people();
+    init_detected_card_images_area();
 
     video_display_widget = ui->video_display;
     video_display_sink = video_display_widget->videoSink();
@@ -56,7 +86,7 @@ MainWindow::MainWindow(PictureGenerator& picture_factory,
 MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::show_video_cover() {
-    QImage cover("://resources/images/video_cover.png");
+    QImage cover("://resources/images/1F3A5_color.png");
     QImage imageARBG = cover.convertToFormat(QImage::Format_ARGB32);
 
     display_arbg_image(imageARBG);
@@ -104,12 +134,9 @@ void MainWindow::loop_video_pictures() {
                     std::cerr << "box height overflow!" << std::endl;
                     box.height = size.height - box.y;
                 }
-                detected_people_cards.at(0).images.push_back(human_card::CardImage{
-                    .big_frame = cloned,
-                    .small_face = cloned(box),
-                    .face_rect = box,
-                });
-                // draw on orignal mat
+
+                un_classified_card_images.emplace_back(cloned, cloned(box), box);
+                // draw on original mat
                 cv::rectangle(mat, box.tl(), box.br(), cv::Scalar(0, 255, 0));
             }
         }
@@ -271,25 +298,50 @@ void MainWindow::SetVideoOpenSuccess(bool succ) {
 void MainWindow::SetVideoDurationSeconds(int64_t duration) { video_duration_s = duration; };
 void MainWindow::SetVideoTotalFrames(int64_t total_frames) { video_total_frames = total_frames; }
 
-void MainWindow::update_detected_people() {
+void MainWindow::init_detected_card_images_area() {
     QVBoxLayout* area_vboxlayout = new QVBoxLayout();
 
-    if (detected_people_area->layout() != nullptr) {
-        for (auto& child : detected_people_area->layout()->children()) {
-            child->deleteLater();
+    // if (detected_people_area->layout() != nullptr) {
+    //     for (auto& child : detected_people_area->layout()->children()) {
+    //         child->deleteLater();
+    //     }
+    // }
+
+    // insert un-classified images
+    {
+        auto section = new ui::Section(QString::fromStdString("unclassified"));
+        section->setObjectName("section-unclassified");
+
+        auto contentLayout = new QHBoxLayout();
+        for (auto& card_image : un_classified_card_images) {
+            auto placeholder = QImage("://resources/images/OIP-C.jpg").scaled(100, 100);
+            auto image_label = new QLabel();
+            image_label->setPixmap(QPixmap::fromImage(placeholder));
+            contentLayout->addWidget(image_label);
         }
+        contentLayout->addStretch();
+
+        section->setContentLayout(*contentLayout);
+        area_vboxlayout->addWidget(section);
     }
 
-    for (auto& card : detected_people_cards) {
-        auto sec = new ui::Section(QString::fromStdString(card.name));
-        auto content = new QHBoxLayout();
-        auto cover = QImage("://resources/images/video_cover.png");
-        auto image_label = new QLabel();
-        image_label->setPixmap(QPixmap::fromImage(cover));
-        content->addWidget(image_label);
-        sec->setContentLayout(*content);
-        area_vboxlayout->addWidget(sec);
+    for (auto& [name, card] : detected_people_cards) {
+        auto section = new ui::Section(QString::fromStdString(name));
+        section->setObjectName("section-" + name);
+
+        auto contentLayout = new QHBoxLayout();
+        for (auto& img : card.images) {
+            auto placeholder = QImage("://resources/images/1F9D1_color.png").scaled(100, 100);
+            auto image_label = new QLabel();
+            image_label->setPixmap(QPixmap::fromImage(placeholder));
+            contentLayout->addWidget(image_label);
+        }
+        contentLayout->addStretch();
+
+        section->setContentLayout(*contentLayout);
+        area_vboxlayout->addWidget(section);
     }
     area_vboxlayout->setAlignment(Qt::AlignTop);
     detected_people_area->setLayout(area_vboxlayout);
+    detected_people_area->children();
 }

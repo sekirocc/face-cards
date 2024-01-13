@@ -121,6 +121,7 @@ target_link_libraries(human_card PRIVATE
         ${OpenCV_LIBS}
         openvino::runtime
         ${DONDE_TOOLKITS_PATH}/libfeature_extract.a
+        ${DONDE_TOOLKITS_PATH}/libfeature_search.a
         ${DONDE_TOOLKITS_PATH}/libvideo_process.a
     )
 

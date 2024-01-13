@@ -45,7 +45,7 @@ class MainWindow : public QMainWindow {
     void display_arbg_image(const QImage& imageARBG);
     void display_picture(const VideoPicture& pic);
 
-    void update_detected_people();
+    void init_detected_card_images_area();
 
   private slots:
     void onStartBtnClicked();
@@ -60,6 +60,7 @@ class MainWindow : public QMainWindow {
     QLineEdit* txt_video_filepath;
     // std::vector<human_card::PeopleCard> detected_people_cards;
     std::unordered_map<std::string, human_card::PeopleCard> detected_people_cards;
+    std::list<human_card::CardImage> un_classified_card_images;
     int selected_people_card_index = -1;
 
     QWidget* detected_people_area;
