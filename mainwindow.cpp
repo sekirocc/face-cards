@@ -15,6 +15,7 @@
 #include <iostream>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/opencv.hpp>
 
 using namespace std::placeholders;
 
@@ -36,6 +37,7 @@ MainWindow::MainWindow(PictureGenerator& picture_factory,
 
     ui->setupUi(this);
 
+    /*
     detected_people_cards.insert({"alice",
                                   human_card::PeopleCard{.name = "Alice",
                                                          .images = {
@@ -64,8 +66,9 @@ MainWindow::MainWindow(PictureGenerator& picture_factory,
                                                              {},
                                                              {},
                                                          }}});
+    */
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 1; i++) {
         un_classified_card_images.push_back(human_card::CardImage());
     }
 
@@ -147,10 +150,13 @@ void MainWindow::loop_video_pictures() {
                     box.height = size.height - box.y;
                 }
 
+                expandBox(box, 0.2, cv::Rect(0, 0, size.width, size.height));
+
                 // draw on original mat
                 cv::rectangle(mat, box.tl(), box.br(), cv::Scalar(0, 255, 0));
 
                 if (should_sample) {
+                    cv::cvtColor(cloned, cloned, cv::COLOR_BGR2RGB);
                     un_classified_card_images.emplace_back(cloned, cloned(box), box);
                 }
             }
@@ -327,17 +333,75 @@ ui::Section* MainWindow::create_section(const std::string& name, const CardImage
 
     auto contentLayout = new FlowLayout();
 
+    int i = 0;
     for (auto& img : card_images) {
         // FIXME: use real image
-        auto placeholder = QImage("://resources/images/1F9D1_color.png").scaled(100, 100);
+        // auto placeholder = QImage("://resources/images/1F9D1_color.png").scaled(100, 100);
         auto image_label = new QLabel();
-        image_label->setPixmap(QPixmap::fromImage(placeholder));
+        auto& mat = img.small_face;
+        if (mat.empty()) {
+            QImage placeholder("://resources/images/1F9D1_color.png");
+            image_label->setPixmap(QPixmap::fromImage(placeholder.scaled(100, 100)));
+        } else {
+            // cv mat is bgr
+            QImage imgRGB(mat.data, mat.cols, mat.rows, mat.step, QImage::Format_RGB888);
+            image_label->setPixmap(QPixmap::fromImage(imgRGB.scaled(100, 100)));
+        }
+        QSizePolicy p{QSizePolicy::Fixed, QSizePolicy::Fixed};
+        p.setRetainSizeWhenHidden(true);
+        image_label->setSizePolicy(p);
+        image_label->setObjectName("card-image-" + std::to_string(i));
+        i++;
         contentLayout->addWidget(image_label);
     }
 
+    contentLayout->setContentsMargins(0, 0, 0, 0);
     section->setContentLayout(*contentLayout);
     // connect(contentLayout, &FlowLayout::heightChanged, section, &ui::Section::setMinimumHeight);
     return section;
+}
+
+void MainWindow::update_section(const std::string& name, const CardImageList& card_images) {
+    qDebug() << "update_section for " << name << ", image size: " << card_images.size();
+
+    auto widget_name = "section-" + name;
+    auto section = detected_people_area->findChild<ui::Section*>(widget_name.c_str());
+
+    FlowLayout* layout = dynamic_cast<FlowLayout*>(section->getContentLayout());
+    if (!layout) {
+        std::cerr << "illegal state, section layout is not QHBoxLayout?? " << std::endl;
+    }
+    if (layout->count() == card_images.size()) {
+        qDebug() << "card_images for " << name << " is unchanged, just return";
+        return;
+    }
+
+    // clear old, add new
+    clearLayout(layout);
+
+    int i = 0;
+    for (auto& img : card_images) {
+        // FIXME: use real image
+        // auto placeholder = QImage("://resources/images/1F9D1_color.png").scaled(100, 100);
+        auto image_label = new QLabel();
+        auto& mat = img.small_face;
+        if (mat.empty()) {
+            QImage placeholder("://resources/images/1F9D1_color.png");
+            image_label->setPixmap(QPixmap::fromImage(placeholder.scaled(100, 100)));
+        } else {
+            // cv mat is bgr
+            QImage imgRGB(mat.data, mat.cols, mat.rows, mat.step, QImage::Format_RGB888);
+            image_label->setPixmap(QPixmap::fromImage(imgRGB.scaled(100, 100)));
+        }
+        QSizePolicy p{QSizePolicy::Fixed, QSizePolicy::Fixed};
+        p.setRetainSizeWhenHidden(true);
+        image_label->setSizePolicy(p);
+        image_label->setObjectName("card-image-" + std::to_string(i));
+        i++;
+        layout->addWidget(image_label);
+    }
+
+    section->updateHeights();
 }
 
 void MainWindow::update_sections_if_need() {
@@ -352,30 +416,4 @@ void MainWindow::update_sections_if_need() {
         }
         t1 = now;
     }
-}
-
-void MainWindow::update_section(const std::string& name, const CardImageList& card_images) {
-    qDebug() << "update_section for " << name << ", image size: " << card_images.size();
-
-    auto widget_name = "section-" + name;
-    auto section = detected_people_area->findChild<ui::Section*>(widget_name.c_str());
-
-    FlowLayout* layout = dynamic_cast<FlowLayout*>(section->getContentLayout());
-    if (!layout) {
-        std::cerr << "illegal state, section layout is not QHBoxLayout?? " << std::endl;
-    }
-    auto children = layout->findChildren<QLabel*>();
-    for (auto& child : children) {
-        layout->removeWidget(child);
-    }
-
-    for (auto& img : card_images) {
-        // FIXME: use real image
-        auto placeholder = QImage("://resources/images/1F9D1_color.png").scaled(100, 100);
-        auto image_label = new QLabel();
-        image_label->setPixmap(QPixmap::fromImage(placeholder));
-        layout->addWidget(image_label);
-    }
-
-    section->updateHeights();
 }

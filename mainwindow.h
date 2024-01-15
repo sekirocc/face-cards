@@ -93,4 +93,39 @@ class MainWindow : public QMainWindow {
     int64_t video_total_frames;
 };
 
+inline void clearLayout(QLayout* layout) {
+    QLayoutItem* item;
+    while ((item = layout->takeAt(0)) != nullptr) {
+        if (item->layout()) {
+            clearLayout(item->layout());
+        }
+        if (item->widget()) {
+            delete item->widget();
+        }
+        delete item;
+    }
+}
+
+inline void expandBox(cv::Rect& box, float factor, cv::Rect bound) {
+    auto delta_x = static_cast<int>(box.width * factor);
+    auto delta_y = static_cast<int>(box.height * factor);
+    box.x -= delta_x;
+    box.y -= delta_y;
+    box.width += delta_x * 2;
+    box.height += delta_y * 2;
+
+    if (box.x < bound.x) {
+        box.x = bound.x;
+    }
+    if (box.y < bound.y) {
+        box.y = bound.y;
+    }
+    if (box.x + box.width > bound.x + bound.width) {
+        box.width = bound.x + bound.width - box.x;
+    }
+    if (box.y + box.height > bound.y + bound.height) {
+        box.height = bound.y + bound.height - box.y;
+    }
+}
+
 #endif // MAINWINDOW_H

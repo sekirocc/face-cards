@@ -110,7 +110,7 @@ namespace ui
     void Section::updateHeights()
     {
         int contentHeight = contentArea->layout()->heightForWidth(width());
-        qDebug() << "contentHeight: " << contentHeight;
+        qDebug() << "content layout count size: " << contentArea->layout()->count() << ", width()" << width() << ", contentHeight: " << contentHeight;
 
         for (int i = 0; i < toggleAnimation->animationCount() - 1; ++i)
         {
