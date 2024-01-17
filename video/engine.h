@@ -14,8 +14,6 @@ using donde_toolkits::feature_extract::FacePipeline;
 
 namespace peoplecards {
 
-using ImageReceiverFunc = std::function<bool(const cv::Mat& mat)>;
-
 using CardImageList = std::vector<peoplecards::CardImage>;
 using PeopleCards = std::unordered_map<std::string, peoplecards::PeopleCard>;
 
@@ -48,7 +46,6 @@ class Engine : public QObject {
     PictureGenerator& picture_factory;
     PlayController& media_controller;
     FacePipeline& face_pipeline;
-    ImageReceiverFunc image_receiver;
 };
 
 } // namespace peoplecards
