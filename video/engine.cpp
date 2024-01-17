@@ -3,20 +3,15 @@
 #include "utils.h"
 
 namespace peoplecards {
-Engine::Engine(PictureGenerator& picture_factory,
-               PlayController& media_controller,
-               FacePipeline& pipeline)
-    : media_controller(media_controller),
-      picture_factory(picture_factory),
-      face_pipeline(pipeline) {
+Engine::Engine(PictureGenerator& picture_factory, PlayController& media_controller, FacePipeline& pipeline)
+    : media_controller(media_controller), picture_factory(picture_factory), face_pipeline(pipeline) {
 
     for (int i = 0; i < 1; i++) {
         un_classified_card_images.push_back(human_card::CardImage());
     }
 };
 
-void Engine::Start(ImageReceiverFunc image_receiver) {
-    this->image_receiver = image_receiver;
+void Engine::Start() {
     is_running = true;
     picture_thread = std::thread([&] { loop_video_pictures(); });
 };
@@ -25,9 +20,7 @@ void Engine::Stop() { is_running = false; };
 
 CardImageList& Engine::UnClassifiedCardImages() { return un_classified_card_images; };
 
-std::unordered_map<std::string, human_card::PeopleCard>& Engine::ClassifiedCardImages() {
-    return detected_people_cards;
-};
+PeopleCards& Engine::ClassifiedCardImages() { return detected_people_cards; };
 
 void Engine::loop_video_pictures() {
     while (is_running) {
@@ -41,8 +34,7 @@ void Engine::loop_video_pictures() {
 
         auto frame_width = pic->Width();
         auto frame_height = pic->Height();
-        cv::Mat mat(
-            frame_height, frame_width, CV_8UC3, pic->frame->data[0], pic->frame->linesize[0]);
+        cv::Mat mat(frame_height, frame_width, CV_8UC3, pic->frame->data[0], pic->frame->linesize[0]);
 
         // draw frame id
         std::string pic_id = fmt::format("{}", pic->id_);
@@ -96,7 +88,8 @@ void Engine::loop_video_pictures() {
                    detect_result->faces.size());
         }
 
-        image_receiver(mat);
+        // image_receiver(mat);
+        emit displayCvMat(mat);
 
         if (should_sample) {
             emit updateUI();
