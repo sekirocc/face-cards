@@ -50,7 +50,7 @@ MainWindow::MainWindow(PictureGenerator& picture_factory,
 
     /*
     detected_people_cards.insert({"alice",
-                                  human_card::PeopleCard{.name = "Alice",
+                                  peoplecards::PeopleCard{.name = "Alice",
                                                          .images = {
                                                              {},
                                                              {},
@@ -61,7 +61,7 @@ MainWindow::MainWindow(PictureGenerator& picture_factory,
                                                          }}});
 
     detected_people_cards.insert({"bob",
-                                  human_card::PeopleCard{.name = "Bob",
+                                  peoplecards::PeopleCard{.name = "Bob",
                                                          .images = {
                                                              {},
                                                              {},
@@ -71,7 +71,7 @@ MainWindow::MainWindow(PictureGenerator& picture_factory,
                                                          }}});
 
     detected_people_cards.insert({"candy",
-                                  human_card::PeopleCard{.name = "Candy",
+                                  peoplecards::PeopleCard{.name = "Candy",
                                                          .images = {
                                                              {},
                                                              {},

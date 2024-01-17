@@ -16,8 +16,8 @@ namespace peoplecards {
 
 using ImageReceiverFunc = std::function<bool(const cv::Mat& mat)>;
 
-using CardImageList = std::vector<human_card::CardImage>;
-using PeopleCards = std::unordered_map<std::string, human_card::PeopleCard>;
+using CardImageList = std::vector<peoplecards::CardImage>;
+using PeopleCards = std::unordered_map<std::string, peoplecards::PeopleCard>;
 
 class Engine : public QObject {
 
@@ -41,7 +41,7 @@ class Engine : public QObject {
     bool is_running;
     std::thread picture_thread;
 
-    // std::vector<human_card::PeopleCard> detected_people_cards;
+    // std::vector<peoplecards::PeopleCard> detected_people_cards;
     PeopleCards detected_people_cards;
     CardImageList un_classified_card_images;
 
