@@ -88,7 +88,6 @@ void Engine::loop_video_pictures() {
                    detect_result->faces.size());
         }
 
-        // image_receiver(mat);
         emit displayCvMat(mat);
 
         if (should_sample) {
