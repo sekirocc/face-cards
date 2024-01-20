@@ -44,8 +44,7 @@ MainWindow::MainWindow(PictureGenerator& picture_factory,
     : QMainWindow(parent), ui(new Ui::MainWindow), media_controller(media_controller) {
 
     qDebug() << "windowSize: " << windowSize << ", windowRect: " << windowRect;
-    this->setGeometry(
-        QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, windowSize, windowRect));
+    this->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, windowSize, windowRect));
 
     ui->setupUi(this);
 
@@ -101,8 +100,8 @@ MainWindow::MainWindow(PictureGenerator& picture_factory,
     connect(btn_start, &QPushButton::clicked, this, &MainWindow::onStartBtnClicked);
     connect(btn_stop, &QPushButton::clicked, this, &MainWindow::onStopBtnClicked);
 
-    connect(
-        engine.get(), &peoplecards::Engine::updateUI, this, &MainWindow::update_sections_if_need);
+    connect(engine.get(), &peoplecards::Engine::updateUI, this, &MainWindow::update_sections_if_need);
+    connect(engine.get(), &peoplecards::Engine::displayCvMat, this, &MainWindow::display_cv_image);
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -206,16 +205,15 @@ void MainWindow::onStartBtnClicked() {
 
         int new_width = info.width * 1.0 / info.height * height;
         video_display_widget->setFixedWidth(new_width);
-        qDebug() << "video widget height: " << height << " width: " << width << ", new_width"
-                 << new_width;
+        qDebug() << "video widget height: " << height << " width: " << width << ", new_width" << new_width;
         qDebug() << "video meta height: " << info.height << " width: " << info.width;
 
         media_controller.Start();
         btn_start->setText("Pause");
 
-        peoplecards::ImageReceiverFunc image_receiver
-            = std::bind(&MainWindow::display_cv_image, this, std::placeholders::_1);
-        engine->Start(image_receiver);
+        // peoplecards::ImageReceiverFunc image_receiver
+        //     = std::bind(&MainWindow::display_cv_image, this, std::placeholders::_1);
+        engine->Start();
 
         break;
     }

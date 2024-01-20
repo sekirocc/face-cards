@@ -17,23 +17,23 @@ namespace peoplecards {
 using ImageReceiverFunc = std::function<bool(const cv::Mat& mat)>;
 
 using CardImageList = std::vector<human_card::CardImage>;
+using PeopleCards = std::unordered_map<std::string, human_card::PeopleCard>;
 
 class Engine : public QObject {
 
     Q_OBJECT
 
   public:
-    Engine(PictureGenerator& picture_factory,
-           PlayController& media_controller,
-           FacePipeline& pipeline);
-    void Start(ImageReceiverFunc image_receiver);
+    Engine(PictureGenerator& picture_factory, PlayController& media_controller, FacePipeline& pipeline);
+    void Start();
     void Stop();
 
     CardImageList& UnClassifiedCardImages();
-    std::unordered_map<std::string, human_card::PeopleCard>& ClassifiedCardImages();
+    PeopleCards& ClassifiedCardImages();
 
   signals:
     void updateUI();
+    void displayCvMat(const cv::Mat& mat);
 
   private:
     void loop_video_pictures();
@@ -42,7 +42,7 @@ class Engine : public QObject {
     std::thread picture_thread;
 
     // std::vector<human_card::PeopleCard> detected_people_cards;
-    std::unordered_map<std::string, human_card::PeopleCard> detected_people_cards;
+    PeopleCards detected_people_cards;
     CardImageList un_classified_card_images;
 
     PictureGenerator& picture_factory;
