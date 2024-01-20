@@ -1,6 +1,12 @@
-## Human Card
+## Face Cards
 
-#### Build 
+#### Introduction
+
+A face aggregation application, showing how to use [donde-toolkits](https://github.com/sekirocc/donde-toolkits)
+
+![image](./assets/ironman.jpeg)
+
+#### Build
 
 ##### Build conan dependencies
 
@@ -19,4 +25,3 @@ cmake --build .
 
 or with CLion, configure CMake option with `-DCMAKE_TOOLCHAIN_FILE=./generated/conan_toolchain.cmake`,
 and reset CMake cache.
-

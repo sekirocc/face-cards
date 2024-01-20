@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.5)
 
-project(human_card VERSION 0.1 LANGUAGES CXX)
+project(face-cards VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(PROJECT_NAME human_card)
+set(PROJECT_NAME face-cards)
 
 
 set(CMAKE_AUTOUIC ON)
@@ -81,26 +81,26 @@ set(PROJECT_SOURCES
 
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(human_card
+    qt_add_executable(face-cards
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         images.qrc
     )
 
 # Define target properties for Android with Qt 6 as:
-#    set_property(TARGET human_card APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
+#    set_property(TARGET face-cards APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
 #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
 # For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
 
 else()
     if(ANDROID)
-        add_library(human_card SHARED
+        add_library(face-cards SHARED
             ${PROJECT_SOURCES}
         )
 # Define properties for Android with Qt 5 after find_package() calls as:
 #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
     else()
-        add_executable(human_card
+        add_executable(face-cards
             ${PROJECT_SOURCES}
         )
     endif()
@@ -108,14 +108,14 @@ endif()
 
 
 
-target_include_directories(human_card PRIVATE
+target_include_directories(face-cards PRIVATE
         video
         3rdparty/qt-collapsible-section
         ${DONDE_TOOLKITS_PATH}/include
         ${FFMPEG_INCLUDE_DIRS}
 )
 
-target_link_libraries(human_card PRIVATE
+target_link_libraries(face-cards PRIVATE
         Qt${QT_VERSION_MAJOR}::Widgets
         Qt${QT_VERSION_MAJOR}::Multimedia
         Qt${QT_VERSION_MAJOR}::MultimediaWidgets
@@ -130,7 +130,7 @@ target_link_libraries(human_card PRIVATE
 
 add_subdirectory(3rdparty/cpp-channel)
 
-target_include_directories(human_card PRIVATE
+target_include_directories(face-cards PRIVATE
         ${CMAKE_SOURCE_DIR}/3rdparty/cpp-channel/include
 )
 
@@ -144,7 +144,7 @@ find_package(Poco REQUIRED)
 find_package(SQLiteCpp REQUIRED)
 find_package(nlohmann_json REQUIRED)
 find_package(libyuv REQUIRED)
-target_link_libraries(human_card
+target_link_libraries(face-cards
     PRIVATE
     fmt::fmt
     spdlog::spdlog
@@ -155,7 +155,7 @@ target_link_libraries(human_card
     nlohmann_json::nlohmann_json
 )
 
-target_include_directories(human_card
+target_include_directories(face-cards
     BEFORE
     PRIVATE
     ${CMAKE_INCLUDE_PATH}
@@ -163,7 +163,7 @@ target_include_directories(human_card
 
 
 
-set_target_properties(human_card PROPERTIES
+set_target_properties(face-cards PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
@@ -171,10 +171,10 @@ set_target_properties(human_card PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-install(TARGETS human_card
+install(TARGETS face-cards
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(human_card)
+    qt_finalize_executable(face-cards)
 endif()
