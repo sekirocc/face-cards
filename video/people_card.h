@@ -1,3 +1,6 @@
+#ifndef PEOPLE_CARD_H
+#define PEOPLE_CARD_H
+
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/opencv.hpp>
@@ -19,3 +22,5 @@ struct PeopleCard {
     std::vector<CardImage> images;
 };
 } // namespace human_card
+
+#endif // PEOPLE_CARD_H

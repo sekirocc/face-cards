@@ -3,21 +3,37 @@
 #include "./ui_mainwindow.h"
 #include "3rdparty/flowlayout/flowlayout.h"
 #include "Section.h"
+#include "engine.h"
 #include "libyuv.h"
 #include "utils.h"
 
 #include <QVideoFrame>
 #include <QVideoFrameFormat>
 #include <QVideoSink>
+#include <__functional/bind.h>
 #include <chrono>
 #include <fmt/format.h>
 #include <functional>
 #include <iostream>
+#include <memory>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 
 using namespace std::placeholders;
+
+void clearLayout(QLayout* layout) {
+    QLayoutItem* item;
+    while ((item = layout->takeAt(0)) != nullptr) {
+        if (item->layout()) {
+            clearLayout(item->layout());
+        }
+        if (item->widget()) {
+            delete item->widget();
+        }
+        delete item;
+    }
+}
 
 MainWindow::MainWindow(PictureGenerator& picture_factory,
                        PlayController& media_controller,
@@ -25,11 +41,7 @@ MainWindow::MainWindow(PictureGenerator& picture_factory,
                        QSize windowSize,
                        QRect windowRect,
                        QWidget* parent)
-    : QMainWindow(parent),
-      ui(new Ui::MainWindow),
-      media_controller(media_controller),
-      picture_factory(picture_factory),
-      face_pipeline(pipeline) {
+    : QMainWindow(parent), ui(new Ui::MainWindow), media_controller(media_controller) {
 
     qDebug() << "windowSize: " << windowSize << ", windowRect: " << windowRect;
     this->setGeometry(
@@ -68,9 +80,7 @@ MainWindow::MainWindow(PictureGenerator& picture_factory,
                                                          }}});
     */
 
-    for (int i = 0; i < 1; i++) {
-        un_classified_card_images.push_back(human_card::CardImage());
-    }
+    engine = std::make_shared<peoplecards::Engine>(picture_factory, media_controller, pipeline);
 
     detected_people_area = ui->scrollAreaWidgetContents;
     init_detected_card_images_area();
@@ -88,12 +98,11 @@ MainWindow::MainWindow(PictureGenerator& picture_factory,
 
     show_video_cover();
 
-    picture_thread = std::thread([&] { loop_video_pictures(); });
-
     connect(btn_start, &QPushButton::clicked, this, &MainWindow::onStartBtnClicked);
     connect(btn_stop, &QPushButton::clicked, this, &MainWindow::onStopBtnClicked);
 
-    connect(this, &MainWindow::updateUI, this, &MainWindow::update_sections_if_need);
+    connect(
+        engine.get(), &peoplecards::Engine::updateUI, this, &MainWindow::update_sections_if_need);
 }
 
 MainWindow::~MainWindow() { delete ui; }
@@ -105,84 +114,12 @@ void MainWindow::show_video_cover() {
     display_arbg_image(imageARBG);
 }
 
-void MainWindow::loop_video_pictures() {
-    while (true) {
-        VideoPicture* pic = picture_factory.next();
-        if (pic == nullptr)
-            continue;
-
-        auto should_sample = pic->Id() % 30 == 0;
-
-        auto frame_width = pic->Width();
-        auto frame_height = pic->Height();
-        cv::Mat mat(
-            frame_height, frame_width, CV_8UC3, pic->frame->data[0], pic->frame->linesize[0]);
-
-        // draw frame id
-        std::string pic_id = fmt::format("{}", pic->id_);
-        cv::Point posi{100, 100};
-        int face = cv::FONT_HERSHEY_PLAIN;
-        double scale = 2;
-        cv::Scalar color{255, 0, 0}; // blue, BGR
-        cv::putText(mat, pic_id, posi, face, scale, color, 2);
-
-        auto t1 = std::chrono::steady_clock::now();
-        // detect face
-        std::shared_ptr<donde_toolkits::DetectResult> detect_result = face_pipeline.Detect(mat);
-        for (auto& face : detect_result->faces) {
-            if (face.confidence > 0.8) {
-                cv::Rect box = face.box;
-                // FIXME: save to first detected cards?
-                auto cloned = mat.clone();
-                auto size = cloned.size();
-                if (box.x <= 0 || box.x >= size.width) {
-                    continue;
-                }
-                if (box.y <= 0 || box.y >= size.height) {
-                    continue;
-                }
-                if (box.x + box.width > size.width) {
-                    std::cerr << "box width overflow!" << std::endl;
-                    box.width = size.width - box.x;
-                }
-                if (box.y + box.height > size.height) {
-                    std::cerr << "box height overflow!" << std::endl;
-                    box.height = size.height - box.y;
-                }
-
-                expandBox(box, 0.2, cv::Rect(0, 0, size.width, size.height));
-
-                // draw on original mat
-                cv::rectangle(mat, box.tl(), box.br(), cv::Scalar(0, 255, 0));
-
-                if (should_sample) {
-                    cv::cvtColor(cloned, cloned, cv::COLOR_BGR2RGB);
-                    un_classified_card_images.emplace_back(cloned, cloned(box), box);
-                }
-            }
-        }
-
-        if (should_sample) {
-            auto [t2, used_ms] = now_time_since(t1);
-            printf("face pipeline detect use time: %lld ms, pic_id: %ld, detected faces: %ld\n",
-                   used_ms.count(),
-                   pic->id_,
-                   detect_result->faces.size());
-        }
-
-        display_cv_image(mat);
-
-        if (should_sample) {
-            emit updateUI();
-        }
-    }
-}
-
-void MainWindow::display_cv_image(const cv::Mat& mat) {
+bool MainWindow::display_cv_image(const cv::Mat& mat) {
     QImage imgBGR((uchar*)mat.data, mat.cols, mat.rows, QImage::Format_BGR888);
     QImage imageARBG = imgBGR.convertToFormat(QImage::Format_ARGB32);
 
     display_arbg_image(imageARBG);
+    return true;
 }
 
 void MainWindow::display_arbg_image(const QImage& imageARBG) {
@@ -275,6 +212,11 @@ void MainWindow::onStartBtnClicked() {
 
         media_controller.Start();
         btn_start->setText("Pause");
+
+        peoplecards::ImageReceiverFunc image_receiver
+            = std::bind(&MainWindow::display_cv_image, this, std::placeholders::_1);
+        engine->Start(image_receiver);
+
         break;
     }
 
@@ -308,6 +250,9 @@ void MainWindow::SetVideoTotalFrames(int64_t total_frames) { video_total_frames 
 
 void MainWindow::init_detected_card_images_area() {
     QVBoxLayout* layout = new QVBoxLayout();
+
+    auto& un_classified_card_images = engine->UnClassifiedCardImages();
+    auto& detected_people_cards = engine->ClassifiedCardImages();
 
     // insert un-classified images
     {
@@ -409,6 +354,9 @@ void MainWindow::update_sections_if_need() {
     auto [now, used_ms] = now_time_since(t1);
     if (used_ms.count() >= 1000) {
         qDebug() << "run update_sections_if_need";
+
+        auto& un_classified_card_images = engine->UnClassifiedCardImages();
+        auto& detected_people_cards = engine->ClassifiedCardImages();
 
         update_section("unclassified", un_classified_card_images);
         for (auto& [name, card] : detected_people_cards) {
