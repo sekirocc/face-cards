@@ -1,21 +1,14 @@
 #pragma once
 
+#include "donde/video_process/ffmpeg_processor.h"
 #include "msd/channel.hpp"
 #include "picture.h"
 
 #include <atomic>
 #include <chrono>
-#include <donde/video_process/ffmpeg_processor.h>
 #include <memory>
 #include <string>
 #include <thread>
-
-extern "C" {
-#include <libavcodec/avcodec.h>
-#include <libavformat/avformat.h>
-#include <libavutil/imgutils.h>
-#include <libswscale/swscale.h>
-}
 
 using donde_toolkits::video_process::FFmpegVideoFrameProcessor;
 using donde_toolkits::video_process::FFmpegVideoProcessor;
@@ -26,8 +19,7 @@ class PictureGenerator {
         : video_processor_{video_processor}, pictures_len(pictures_len) {
         pictures = new VideoPicture[pictures_len];
 
-        FFmpegVideoFrameProcessor p(
-            std::bind(&PictureGenerator::consume_frame, this, std::placeholders::_1));
+        FFmpegVideoFrameProcessor p(std::bind(&PictureGenerator::consume_frame, this, std::placeholders::_1));
 
         video_processor.Register(p);
 
@@ -43,10 +35,8 @@ class PictureGenerator {
 
         frames_per_second++;
         auto now = std::chrono::steady_clock::now();
-        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - record_time).count()
-            >= 1000) {
-            std::cout << "fps: " << frames_per_second << ", frame id: " << vf->getFrameId()
-                      << std::endl;
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - record_time).count() >= 1000) {
+            std::cout << "fps: " << frames_per_second << ", frame id: " << vf->getFrameId() << std::endl;
             frames_per_second = 0;
             record_time = now;
         }
