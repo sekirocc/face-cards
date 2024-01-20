@@ -7,7 +7,7 @@ Engine::Engine(PictureGenerator& picture_factory, PlayController& media_controll
     : media_controller(media_controller), picture_factory(picture_factory), face_pipeline(pipeline) {
 
     for (int i = 0; i < 1; i++) {
-        un_classified_card_images.push_back(human_card::CardImage());
+        un_classified_card_images.push_back(peoplecards::CardImage());
     }
 };
 

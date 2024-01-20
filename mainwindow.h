@@ -24,7 +24,7 @@ class MainWindow;
 }
 QT_END_NAMESPACE
 
-using CardImageList = std::vector<human_card::CardImage>;
+using CardImageList = std::vector<peoplecards::CardImage>;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT

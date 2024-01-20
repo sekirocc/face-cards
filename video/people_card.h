@@ -7,7 +7,7 @@
 #include <string>
 #include <utility>
 
-namespace human_card {
+namespace peoplecards {
 struct CardImage {
     CardImage(){};
     CardImage(const cv::Mat& big, const cv::Mat& small, const cv::Rect& rect)
@@ -21,6 +21,6 @@ struct PeopleCard {
     std::string name;
     std::vector<CardImage> images;
 };
-} // namespace human_card
+} // namespace peoplecards
 
 #endif // PEOPLE_CARD_H
