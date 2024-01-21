@@ -81,6 +81,22 @@ MainWindow::MainWindow(PictureGenerator& picture_factory,
 
     engine = std::make_shared<peoplecards::Engine>(picture_factory, media_controller, pipeline);
 
+    btn_detect_video = ui->btn_detect_video;
+    btn_detect_video->setText("🔥");
+
+    btn_detect_report = ui->btn_detect_report;
+    btn_detect_report->setText("💬");
+
+    btn_settings = ui->btn_settings;
+    btn_settings->setText("🎁");
+
+    stack_pages = ui->stackedWidget;
+
+    connect(btn_detect_video, &QPushButton::clicked, this, &MainWindow::onShowDetectVideoPage);
+    connect(btn_detect_report, &QPushButton::clicked, this, &MainWindow::onShowDetectReportPage);
+    connect(btn_settings, &QPushButton::clicked, this, &MainWindow::onShowSettingsPage);
+    stack_pages->setCurrentIndex(0);
+
     detected_people_area = ui->scrollAreaWidgetContents;
     init_detected_card_images_area();
 
@@ -234,6 +250,10 @@ void MainWindow::onStopBtnClicked() {
     media_controller.Stop();
     btn_start->setText("Start");
 }
+
+void MainWindow::onShowDetectVideoPage() { stack_pages->setCurrentIndex(0); }
+void MainWindow::onShowDetectReportPage() { stack_pages->setCurrentIndex(1); }
+void MainWindow::onShowSettingsPage() { stack_pages->setCurrentIndex(2); }
 
 void MainWindow::SetVideoOpenSuccess(bool succ) {
     video_open_success = succ;

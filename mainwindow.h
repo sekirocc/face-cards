@@ -13,8 +13,11 @@
 #include <opencv2/core/mat.hpp>
 #include <qabstractspinbox.h>
 #include <qboxlayout.h>
+#include <qlabel.h>
+#include <qlistwidget.h>
 #include <qprogressbar.h>
 #include <qpushbutton.h>
+#include <qstackedwidget.h>
 
 using donde_toolkits::feature_extract::FacePipeline;
 
@@ -59,8 +62,12 @@ class MainWindow : public QMainWindow {
   private slots:
     void onStartBtnClicked();
     void onStopBtnClicked();
+    void onShowDetectVideoPage();
+    void onShowDetectReportPage();
+    void onShowSettingsPage();
 
   signals:
+
     void updateUI();
 
   private:
@@ -68,6 +75,12 @@ class MainWindow : public QMainWindow {
 
     QVideoWidget* video_display_widget;
     QVideoSink* video_display_sink;
+
+    QPushButton* btn_detect_video;
+    QPushButton* btn_detect_report;
+    QPushButton* btn_settings;
+
+    QStackedWidget* stack_pages;
 
     QLineEdit* txt_video_filepath;
 
