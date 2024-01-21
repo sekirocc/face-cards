@@ -18,6 +18,7 @@
 #include <qprogressbar.h>
 #include <qpushbutton.h>
 #include <qstackedwidget.h>
+#include <qtoolbutton.h>
 
 using donde_toolkits::feature_extract::FacePipeline;
 
@@ -76,9 +77,9 @@ class MainWindow : public QMainWindow {
     QVideoWidget* video_display_widget;
     QVideoSink* video_display_sink;
 
-    QPushButton* btn_detect_video;
-    QPushButton* btn_detect_report;
-    QPushButton* btn_settings;
+    QToolButton* btn_detect_video;
+    QToolButton* btn_detect_report;
+    QToolButton* btn_settings;
 
     QStackedWidget* stack_pages;
 

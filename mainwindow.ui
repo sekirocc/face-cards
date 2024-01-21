@@ -16,17 +16,17 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout_3">
     <item>
-     <widget class="QWidget" name="widget_3" native="true">
+     <widget class="QWidget" name="pageControllWidget" native="true">
       <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
-        <widget class="QPushButton" name="btn_detect_video">
+        <widget class="QToolButton" name="btn_detect_video">
          <property name="text">
           <string>Video</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="btn_detect_report">
+        <widget class="QToolButton" name="btn_detect_report">
          <property name="text">
           <string>Result</string>
          </property>
@@ -46,7 +46,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="btn_settings">
+        <widget class="QToolButton" name="btn_settings">
          <property name="text">
           <string>Settings</string>
          </property>
@@ -58,7 +58,7 @@
     <item>
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="page_video">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -234,7 +234,7 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>890</width>
+                   <width>819</width>
                    <height>201</height>
                   </rect>
                  </property>
@@ -302,10 +302,38 @@
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="page_report">
+       <layout class="QVBoxLayout" name="verticalLayout_7">
+        <item>
+         <widget class="QTableView" name="tableView"/>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="page_settings">
-       <layout class="QGridLayout" name="gridLayout">
+       <layout class="QFormLayout" name="formLayout">
         <item row="0" column="0">
-         <widget class="QWidget" name="widget_sidebar" native="true"/>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QCheckBox" name="checkBox">
+          <property name="text">
+           <string>CheckBox</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>TextLabel</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLineEdit" name="lineEdit"/>
         </item>
        </layout>
       </widget>
