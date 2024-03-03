@@ -1,28 +1,25 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 
 project(face-cards VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(PROJECT_NAME face-cards)
 
 
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 
 ##
 ## QT6
 ##
 
+
 ## set(CMAKE_PREFIX_PATH "/opt/Qt/6.5.3/gcc_64" ${CMAKE_PREFIX_PATH})
 message("CMAKE_PREFIX_PATH: ${CMAKE_PREFIX_PATH}")
-find_package(QT NAMES Qt6 Qt5
-        REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR}
-        REQUIRED COMPONENTS Widgets
-        OPTIONAL_COMPONENTS Multimedia MultimediaWidgets)
+
+find_package(Qt6 6.4 REQUIRED COMPONENTS REQUIRED Quick OPTIONAL_COMPONENTS Multimedia)
+
+qt_standard_project_setup()
 
 
 
@@ -67,71 +64,55 @@ file(GLOB VIDEO_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/video/*.h)
 
 
 set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
-        3rdparty/qt-collapsible-section/Section.h
-        3rdparty/qt-collapsible-section/Section.cpp
-        3rdparty/flowlayout/flowlayout.h
-        3rdparty/flowlayout/flowlayout.cpp
-        ${VIDEO_SOURCES}
-        ${VIDEO_HEADERS}
+    main.cpp
+    # mainwindow.cpp
+    # mainwindow.h
+    # mainwindow.ui
+    # 3rdparty/qt-collapsible-section/Section.h
+    # 3rdparty/qt-collapsible-section/Section.cpp
+    # 3rdparty/flowlayout/flowlayout.h
+    # 3rdparty/flowlayout/flowlayout.cpp
+    ${VIDEO_SOURCES}
+    ${VIDEO_HEADERS}
 )
 
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(face-cards
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-        images.qrc
-    )
+qt_add_executable(face-cards
+    MANUAL_FINALIZATION
+    ${PROJECT_SOURCES}
+    images.qrc
+)
 
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET face-cards APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
-
-else()
-    if(ANDROID)
-        add_library(face-cards SHARED
-            ${PROJECT_SOURCES}
-        )
-# Define properties for Android with Qt 5 after find_package() calls as:
-#    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(face-cards
-            ${PROJECT_SOURCES}
-        )
-    endif()
-endif()
-
-
+qt_add_qml_module(face-cards
+    URI face-cards
+    VERSION 1.0
+    QML_FILES main.qml
+    QML_FILES ExpandableMenus.qml
+)
 
 target_include_directories(face-cards PRIVATE
-        video
-        3rdparty/qt-collapsible-section
-        ${DONDE_TOOLKITS_PATH}/include
-        ${FFMPEG_INCLUDE_DIRS}
+    video
+    3rdparty/qt-collapsible-section
+    ${DONDE_TOOLKITS_PATH}/include
+    ${FFMPEG_INCLUDE_DIRS}
 )
 
 target_link_libraries(face-cards PRIVATE
-        Qt${QT_VERSION_MAJOR}::Widgets
-        Qt${QT_VERSION_MAJOR}::Multimedia
-        Qt${QT_VERSION_MAJOR}::MultimediaWidgets
-        ${FFMPEG_LIBRARIES}
-        ${OpenCV_LIBS}
-        openvino::runtime
-        ${DONDE_TOOLKITS_PATH}/libfeature_extract.a
-        ${DONDE_TOOLKITS_PATH}/libfeature_search.a
-        ${DONDE_TOOLKITS_PATH}/libvideo_process.a
-    )
+    Qt6::Quick
+    Qt6::Multimedia
+    ${FFMPEG_LIBRARIES}
+    ${OpenCV_LIBS}
+    openvino::runtime
+    ${DONDE_TOOLKITS_PATH}/libfeature_extract.a
+    ${DONDE_TOOLKITS_PATH}/libfeature_search.a
+    ${DONDE_TOOLKITS_PATH}/libvideo_process.a
+)
 
 
 add_subdirectory(3rdparty/cpp-channel)
 
 target_include_directories(face-cards PRIVATE
-        ${CMAKE_SOURCE_DIR}/3rdparty/cpp-channel/include
+    ${CMAKE_SOURCE_DIR}/3rdparty/cpp-channel/include
 )
 
 
@@ -149,7 +130,6 @@ target_link_libraries(face-cards
     fmt::fmt
     spdlog::spdlog
     Poco::Poco
-    #### msgpack::msgpack
     SQLiteCpp
     libyuv::libyuv
     nlohmann_json::nlohmann_json
