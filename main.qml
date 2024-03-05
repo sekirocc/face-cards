@@ -12,7 +12,7 @@ ApplicationWindow {
 
     FontLoader {
         id: fontAwesomeLoader
-        source: "fonts/fa-solid-900.ttf"
+        source: "qrc:///resources/fonts/fa-solid-900.ttf"
     }
 
     Rectangle {

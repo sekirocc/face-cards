@@ -8,6 +8,9 @@ set(PROJECT_NAME face-cards)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# set(CMAKE_AUTOUIC ON)
+# set(CMAKE_AUTOMOC ON)
+# set(CMAKE_AUTORCC ON)
 
 ##
 ## QT6
@@ -76,11 +79,12 @@ set(PROJECT_SOURCES
     ${VIDEO_HEADERS}
 )
 
+qt_add_resources(PROJECT_SOURCES
+    assets.qrc
+)
 
 qt_add_executable(face-cards
-    MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
-    assets.qrc
 )
 
 
@@ -91,9 +95,6 @@ qt_add_qml_module(face-cards
         "main.qml"
         "ExpandableMenus.qml"
         "Style.qml"
-    RESOURCES
-        "fonts/fa-solid-900.ttf"
-        "fonts/Font-Awesome-6-Free-Solid-900.otf"
 )
 
 target_include_directories(face-cards PRIVATE

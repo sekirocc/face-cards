@@ -1,8 +1,10 @@
 <RCC>
     <qresource prefix="/">
-        <file>resources/images/video_cover.png</file>
+        <file>resources/fonts/fa-solid-900.ttf</file>
+        <file>resources/fonts/Font-Awesome-6-Free-Solid-900.otf</file>
         <file>resources/images/OIP-C.jpg</file>
         <file>resources/images/1F9D1_color.png</file>
         <file>resources/images/1F3A5_color.png</file>
+        <file>resources/images/video_cover.png</file>
     </qresource>
 </RCC>
