@@ -10,18 +10,39 @@ ApplicationWindow {
     title: "Main Page"
     color: "lightgray"
 
+    FontLoader {
+        id: fontAwesomeLoader
+        source: "fonts/fa-solid-900.ttf"
+    }
 
-    ExpandableMenus {
+    Rectangle {
         id: menuPane
         width: mainWindow.width * 0.25
         height: mainWindow.height
         anchors.left: parent.left
         anchors.top: parent.top
         anchors.bottom: parent.bottom
+        ExpandableMenus {
+            anchors.fill: parent
 
-        menuWidth: width
+            menuWidth: width
+        }
+
+        Text {
+            id: menuPaneIcon
+            anchors.bottom: parent.bottom
+            anchors.horizontalCenter: parent
+            padding: 10
+            font {
+                family: fontAwesomeLoader.font.family
+                pixelSize: 40
+            }
+            text: "\uf0fc"
+            color: "red"
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+        }
     }
-
 
     // Body Area
     Rectangle {

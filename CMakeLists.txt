@@ -80,14 +80,20 @@ set(PROJECT_SOURCES
 qt_add_executable(face-cards
     MANUAL_FINALIZATION
     ${PROJECT_SOURCES}
-    images.qrc
+    assets.qrc
 )
+
 
 qt_add_qml_module(face-cards
     URI face-cards
     VERSION 1.0
-    QML_FILES main.qml
-    QML_FILES ExpandableMenus.qml
+    QML_FILES
+        "main.qml"
+        "ExpandableMenus.qml"
+        "Style.qml"
+    RESOURCES
+        "fonts/fa-solid-900.ttf"
+        "fonts/Font-Awesome-6-Free-Solid-900.otf"
 )
 
 target_include_directories(face-cards PRIVATE
