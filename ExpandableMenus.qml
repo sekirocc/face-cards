@@ -1,9 +1,13 @@
 import QtQuick 2.15
+import QtQuick.Layouts
 
 Item {
     id: root
 
     required property int menuWidth
+    required property int menuSeperatorWidth
+    required property string fontAwesomeFamily
+
 
     ListModel {
         id: menuModel
@@ -37,7 +41,7 @@ Item {
             id: sectionHeaderRect
             width: menuListView.width
             height: 50
-            color: "gray"
+            color: "white"
 
             property bool isExpanded
             property string currentExpandedSection: ListView.view.expandedSection
@@ -52,9 +56,11 @@ Item {
             }
             onIsExpandedChanged: {
                 if (isExpanded) {
-                    color = "blue";
+                    bottomBorder.height = 2;
+                    expandIndicator.text = "\u25BC"
                 } else {
-                    color = "gray";
+                    bottomBorder.height = 0;
+                    expandIndicator.text = "\u25B6"
                 }
                 for (var i = 0; i < menuModel.count; i ++) {
                     var m = menuModel.get(i);
@@ -64,10 +70,48 @@ Item {
                 }
             }
 
-            Text {
-                id: sectionHeaderText
-                text: section
-                anchors.centerIn: parent
+
+            RowLayout {
+                anchors.fill: parent
+                Text {
+                    id: sectionHeaderText
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                    color: "red"
+                    text: section
+                }
+                Text {
+                    id: expandIndicator
+                    Layout.fillHeight: true
+                    verticalAlignment: Text.AlignVCenter
+                    width: 40
+                    color: "blue"
+                    text: "\u25B6"
+                    font {
+                        family: root.fontAwesomeFamily
+                        pixelSize: 20
+                    }
+                }
+            }
+
+
+            Rectangle {
+                id: bottomBorder
+                color: "black"
+                height: root.menuSeperatorWidth
+                width: sectionHeaderRect.width
+                anchors.bottom: sectionHeaderRect.bottom
+
+            }
+
+            Rectangle {
+                id: topBorder
+                color: "black"
+                height: root.menuSeperatorWidth
+                width: sectionHeaderRect.width
+                anchors.top: sectionHeaderRect.top
             }
 
             MouseArea {

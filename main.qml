@@ -5,8 +5,8 @@ import QtQuick.Controls 2.15
 ApplicationWindow {
     id: mainWindow
     visible: true
-    width: 800
-    height: 600
+    width: Screen.width
+    height: Screen.height
     title: "Main Page"
     color: "lightgray"
 
@@ -26,21 +26,22 @@ ApplicationWindow {
             anchors.fill: parent
 
             menuWidth: width
+            menuSeperatorWidth: 2
+            fontAwesomeFamily: fontAwesomeLoader.font.family
         }
 
         Text {
             id: menuPaneIcon
             anchors.bottom: parent.bottom
-            anchors.horizontalCenter: parent
-            padding: 10
+            anchors.horizontalCenter: parent.horizontalCenter
+            height: 40
             font {
                 family: fontAwesomeLoader.font.family
-                pixelSize: 40
+                pixelSize: 20
             }
-            text: "\uf0fc"
+            text: "\u25C4"
             color: "red"
             horizontalAlignment: Text.AlignHCenter
-            verticalAlignment: Text.AlignVCenter
         }
     }
 

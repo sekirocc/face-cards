@@ -92,9 +92,10 @@ qt_add_qml_module(face-cards
     URI face-cards
     VERSION 1.0
     QML_FILES
-        "main.qml"
-        "ExpandableMenus.qml"
-        "Style.qml"
+        main.qml
+        ExpandableMenus.qml
+        Style.qml
+        TaskListPage.qml
 )
 
 target_include_directories(face-cards PRIVATE
